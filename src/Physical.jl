@@ -14,10 +14,8 @@ function InitialData!(gfs)
   sig = 0.1
   x0 = 0.0
 
-  for i = 1:nx
-    psi[i] = amp * exp(-((x[i] - x0) / sig)^2)
-    Pi[i] = 0.0
-  end
+  @. psi = amp * exp(-((x - x0) / sig)^2)
+  @. Pi = 0.0
 
 end
 
@@ -34,12 +32,8 @@ function WaveRHS!(grid, r, u)
   ddpsi = zeros(Float64, nx)
   Derivs.derivs_2nd!(ddpsi, psi, dx, 4)
 
-  # dtu   = rho
-  # dtrho = ddu
-  for i = 1:nx
-    psi_rhs[i] = Pi[i]
-    Pi_rhs[i] = ddpsi[i]
-  end
+  @. psi_rhs = Pi
+  @. Pi_rhs = ddpsi
 
 end
 
