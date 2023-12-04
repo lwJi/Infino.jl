@@ -24,7 +24,7 @@ end
 struct GridF
 
     ndim::Int64
-    gird::Grid
+    grid::Grid
     u::Array{Array{Float64,1},1}
     dxu::Array{Array{Float64,1},1}
 
@@ -33,7 +33,11 @@ struct GridF
         nx = grid.nx
         u = Array{Array{Float64,1},1}(undef, ndim)
         dxu = Array{Array{Float64,1},1}(undef, ndim)
-
+        for i = 1:ndim
+            u[i] = zeros(Float64, nx)
+            dxu[i] = zeros(Float64, nx)
+        end
+        new(ndim, grid, u, dxu)
 
     end
 
