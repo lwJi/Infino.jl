@@ -17,10 +17,14 @@ function main()
   nx = 101
   bbox = [-1.0, 1.0]
   grid = Basic.Grid(nx, bbox)
-  println("nx = ", grid.nx)
 
   gfs = Basic.GridF(2, grid)
   println("nd = ", gfs.nd)
+  println("nx = ", gfs.grid.nx)
+  println("dx = ", gfs.grid.dx)
+  println("dt = ", gfs.grid.dt)
+
+  println("time = ", gfs.grid.time)
 
   Physical.InitialData!(gfs)
 

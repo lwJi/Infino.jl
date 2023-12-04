@@ -20,4 +20,7 @@ function InitialData!(gfs)
 
 end
 
+function WaveScalarRHS!()
+end
+
 end # module Physical
