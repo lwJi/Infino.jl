@@ -34,7 +34,6 @@ struct GridF
   w::Array{Array{Float64,1},1}
 
   function GridF(nd, grid)
-
     nx = grid.nx
     u = Array{Array{Float64,1},1}(undef, nd)
     u_p = Array{Array{Float64,1},1}(undef, nd)
@@ -47,7 +46,6 @@ struct GridF
       w[i] = zeros(Float64, nx)
     end
     new(nd, grid, u, u_p, r, w)
-
   end
 
 end
