@@ -23,6 +23,7 @@ function main()
 
   gfs = Basic.GridF(2, grid)
   println()
+  println("Grid structure and so on:")
   println("  nd = ", gfs.nd)
   println("  nx = ", gfs.grid.nx)
   println("  dx = ", gfs.grid.dx)
@@ -32,6 +33,7 @@ function main()
   ###############
   # Intial Data #
   ###############
+  println("Setting up initial conditions...")
   Physical.InitialData!(gfs)
 
   @printf("Simulation time: %.4f, iteration %d. |psi| = %.4f\n",
@@ -48,6 +50,7 @@ function main()
   itlast = 20
   out_every = 20
 
+  println("Start evolution...")
   for i = 1:itlast
     ODESolver.rk4!(Physical.WaveRHS!, gfs)
     @printf("Simulation time: %.4f, iteration %d. |psi| = %.4f\n",
