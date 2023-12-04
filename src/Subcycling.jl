@@ -3,9 +3,11 @@ using WriteVTK
 using Plots
 
 include("Basic.jl")
+include("Derivs.jl")
 include("Physical.jl")
 
 using .Basic
+using .Derivs
 using .Physical
 
 function main()
@@ -26,24 +28,31 @@ function main()
 
   println("time = ", gfs.grid.time)
 
+  # intial data
   Physical.InitialData!(gfs)
 
+  # derivatives
+  du = Array{Array{Float64,1},1}(undef, gfs.nd)
+  ddu = Array{Array{Float64,1},1}(undef, gfs.nd)
+  for i = 1:gfs.nd
+    du[i] = zeros(Float64, gfs.grid.nx)
+    ddu[i] = zeros(Float64, gfs.grid.nx)
+  end
+  Derivs.calc_du!(du, gfs.u, gfs.grid.dx, 4)
+
+  # output
   time = [0.0]
   nfiles::Int64 = 0
-  au = Animation()
-
-  plt = plot(gfs.grid.x, gfs.u[1], labal="u")
-  plt = scatter!(gfs.grid.x, gfs.u[1])
-  frame(au, plt)
-
-  gif(au, "u.gif")
-
-  #fname = @sprintf("scalar_%04d", nfiles)
-  #vtk_grid(fname, gfs.grid.x, LinRange(0.0, 0.0, 1)) do vtk
-  #    vtk["u", VTKPointData()] = gfs.u[1]
-  #    vtk["rho", VTKPointData()] = gfs.u[2]
-  #    vtk["t", VTKPointData()] = time[1]
-  #end
+  a_u = Animation()
+  plt_u = plot(gfs.grid.x, gfs.u[1], labal="u")
+  plt_u = scatter!(gfs.grid.x, gfs.u[1])
+  frame(a_u, plt_u)
+  gif(a_u, "u.gif")
+  a_du = Animation()
+  plt_du = plot(gfs.grid.x, du[1], labal="du")
+  plt_du = scatter!(gfs.grid.x, du[1])
+  frame(a_du, plt_du)
+  gif(a_du, "du.gif")
 
 end
 

@@ -1,9 +1,9 @@
 module Derivs
 
-function calc_derivs!(du, u, dx, ord=4)
+function derivs_1st!(du, u, dx, ord)
   nx = length(u)
-  istart = 1 + ord / 2
-  iend = nx - ord / 2
+  istart = 1 + div(ord, 2)
+  iend = nx - div(ord, 2)
 
   if (ord == 2)
     for i = istart:iend
@@ -19,10 +19,10 @@ function calc_derivs!(du, u, dx, ord=4)
   end
 end
 
-function calc_derivs2!(ddu, u, dx, ord=4)
+function derivs_2nd!(ddu, u, dx, ord)
   nx = length(u)
-  istart = 1 + ord / 2
-  iend = nx - ord / 2
+  istart = 1 + div(ord, 2)
+  iend = nx - div(ord, 2)
 
   if (ord == 2)
     for i = istart:iend
@@ -37,3 +37,19 @@ function calc_derivs2!(ddu, u, dx, ord=4)
     exit()
   end
 end
+
+function calc_du!(du::Array{Array{Float64,1},1}, u::Array{Array{Float64,1},1},
+    dx, ord=4)
+  for i = 1:length(u)
+    derivs_1st!(du[i], u[i], dx, ord)
+  end
+end
+
+function calc_ddu!(ddu::Array{Array{Float64,1},1}, u::Array{Array{Float64,1},1},
+    dx, ord=4)
+  for i = 1:length(u)
+    derivs_2nd!(ddu[i], u[i], dx, ord)
+  end
+end
+
+end # module Derivs
