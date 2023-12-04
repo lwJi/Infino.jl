@@ -1,7 +1,8 @@
+using ArgParse
+using LinearAlgebra
+using Plots
 using Printf
 using WriteVTK
-using Plots
-using LinearAlgebra
 
 include("Basic.jl")
 include("ODESolver.jl")
@@ -11,15 +12,45 @@ include("Physical.jl")
 #using .ODESolver
 #using .Physical
 
+function parse_commandline()
+
+  s = ArgParseSettings()
+  @add_arg_table s begin
+    "--nx", "-n"
+      help = "number of points in each direction"
+      arg_type = Int
+      default = 101
+    "--out_every"
+      help = "output every so many steps"
+      arg_type = Int
+      default = 20
+    "--cfl"
+      help = "Courant factor"
+      arg_type = Float64
+      default = 0.25
+    "--itlast"
+      help = "maximum time steps"
+      arg_type = Int
+      default = 500
+  end
+  return parse_args(s)
+
+end
+
 function main()
 
   println("===================================================================")
   println("  Welcome to Subcycling Test !!!  ")
   println("===================================================================")
 
-  nx = 101
+  params = parse_commandline()
+  nx = params["nx"]
+  itlast = params["itlast"]
+  out_every = params["out_every"]
+  cfl = params["cfl"]
+
   bbox = [-4.0, 4.0]
-  grid = Basic.Grid(nx, bbox)
+  grid = Basic.Grid(nx, bbox, cfl)
 
   gfs = Basic.GridF(2, grid)
   println()
@@ -30,8 +61,6 @@ function main()
   println("  dt = ", gfs.grid.dt)
   println()
 
-  itlast = 500
-  out_every = 20
   yrange = (0, 1)
   a_psi = Animation()
   a_Pi = Animation()
