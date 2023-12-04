@@ -71,8 +71,8 @@ function main()
   println("Setting up initial conditions...")
   Physical.InitialData!(gfs)
 
-  @printf("Simulation time: %.4f, iteration %d. |psi| = %.4f\n",
-          gfs.grid.time, 0, norm(gfs.u[1]))
+  @printf("Simulation time: %.4f, iteration %d. E = %.4f\n",
+          gfs.grid.time, 0, Physical.Energy(gfs))
 
   plt_psi = plot(gfs.grid.x, gfs.u[1], ylim=(-1,1), labal="psi")
   # plt_psi = scatter!(gfs.grid.x, gfs.u[1])
@@ -86,8 +86,8 @@ function main()
   println("Start evolution...")
   for i = 1:itlast
     ODESolver.rk4!(Physical.WaveRHS!, gfs)
-    @printf("Simulation time: %.4f, iteration %d. |psi| = %.4f\n",
-            gfs.grid.time, i, norm(gfs.u[1]))
+    @printf("Simulation time: %.4f, iteration %d. E = %.4f\n",
+            gfs.grid.time, i, Physical.Energy(gfs))
 
     if (mod(i, out_every) == 0)
       plt_psi = plot(gfs.grid.x, gfs.u[1], ylim=(-1,1), labal="psi")
