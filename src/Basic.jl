@@ -30,22 +30,22 @@ struct GridF
   grid::Grid
   u::Array{Array{Float64,1},1}
   u_p::Array{Array{Float64,1},1}
-  r::Array{Array{Float64,1},1}
+  rhs::Array{Array{Float64,1},1}
   w::Array{Array{Float64,1},1}
 
   function GridF(nd, grid)
     nx = grid.nx
     u = Array{Array{Float64,1},1}(undef, nd)
     u_p = Array{Array{Float64,1},1}(undef, nd)
-    r = Array{Array{Float64,1},1}(undef, nd)
+    rhs = Array{Array{Float64,1},1}(undef, nd)
     w = Array{Array{Float64,1},1}(undef, nd)
     for i = 1:nd
       u[i] = zeros(Float64, nx)
       u_p[i] = zeros(Float64, nx)
-      r[i] = zeros(Float64, nx)
+      rhs[i] = zeros(Float64, nx)
       w[i] = zeros(Float64, nx)
     end
-    new(nd, grid, u, u_p, r, w)
+    new(nd, grid, u, u_p, rhs, w)
   end
 
 end
