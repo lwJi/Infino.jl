@@ -2,7 +2,7 @@ module Basic
 
 export Grid, GridF
 
-struct Grid
+mutable struct Grid
 
   nx::Int64
   xmin::Float64

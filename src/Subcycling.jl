@@ -3,11 +3,11 @@ using WriteVTK
 using Plots
 
 include("Basic.jl")
-include("Derivs.jl")
+include("ODESolver.jl")
 include("Physical.jl")
 
 using .Basic
-using .Derivs
+using .ODESolver
 using .Physical
 
 function main()
@@ -28,31 +28,38 @@ function main()
 
   println("time = ", gfs.grid.time)
 
-  # intial data
+  ###############
+  # Intial Data #
+  ###############
+  println("Setting Initial Data ...")
   Physical.InitialData!(gfs)
 
-  # derivatives
-  du = Array{Array{Float64,1},1}(undef, gfs.nd)
-  ddu = Array{Array{Float64,1},1}(undef, gfs.nd)
-  for i = 1:gfs.nd
-    du[i] = zeros(Float64, gfs.grid.nx)
-    ddu[i] = zeros(Float64, gfs.grid.nx)
+  # output
+  a_u = Animation()
+  plt_u = plot(gfs.grid.x, gfs.u[2], labal="u")
+  # plt_u = scatter!(gfs.grid.x, gfs.u[1])
+  frame(a_u, plt_u)
+
+  ##########
+  # Evolve #
+  ##########
+  println("Evolving ...")
+  for i = 1:9
+    ODESolver.euler!(Physical.WaveRHS!, gfs)
+
+    println("time = ", gfs.grid.time)
+    plt_u = plot(gfs.grid.x, gfs.u[2], labal="u")
+    # plt_u = scatter!(gfs.grid.x, gfs.u[1])
+    frame(a_u, plt_u)
   end
-  Derivs.calc_du!(du, gfs.u, gfs.grid.dx, 4)
 
   # output
-  time = [0.0]
-  nfiles::Int64 = 0
-  a_u = Animation()
-  plt_u = plot(gfs.grid.x, gfs.u[1], labal="u")
-  plt_u = scatter!(gfs.grid.x, gfs.u[1])
-  frame(a_u, plt_u)
   gif(a_u, "u.gif")
-  a_du = Animation()
-  plt_du = plot(gfs.grid.x, du[1], labal="du")
-  plt_du = scatter!(gfs.grid.x, du[1])
-  frame(a_du, plt_du)
-  gif(a_du, "du.gif")
+
+  ########
+  # Exit #
+  ########
+  println("Successfully Done ...")
 
 end
 

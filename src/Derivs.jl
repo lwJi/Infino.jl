@@ -1,5 +1,8 @@
 module Derivs
 
+##################
+# for single var #
+##################
 function derivs_1st!(du, u, dx, ord)
   nx = length(u)
   istart = 1 + div(ord, 2)
@@ -38,6 +41,9 @@ function derivs_2nd!(ddu, u, dx, ord)
   end
 end
 
+###############
+# for varlist #
+###############
 function calc_du!(du::Array{Array{Float64,1},1}, u::Array{Array{Float64,1},1},
     dx, ord=4)
   for i = 1:length(u)

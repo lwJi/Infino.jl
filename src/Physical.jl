@@ -1,12 +1,13 @@
 module Physical
 
+include("Derivs.jl")
+using .Derivs
+
 function InitialData!(gfs)
 
-  println("Setting initial data ...")
-
   nx = gfs.grid.nx
-  u = gfs.u[1]
-  rho = gfs.u[2]
+  psi = gfs.u[1]
+  Pi = gfs.u[2]
   x = gfs.grid.x
 
   amp = 1.0
@@ -14,13 +15,32 @@ function InitialData!(gfs)
   x0 = 0.0
 
   for i = 1:nx
-    u[i] = amp * exp(-((x[i] - x0) / sig)^2)
-    rho[i] = 0.0
+    psi[i] = amp * exp(-((x[i] - x0) / sig)^2)
+    Pi[i] = 0.0
   end
 
 end
 
-function WaveScalarRHS!()
+function WaveRHS!(grid, r, u)
+
+  nx = grid.nx
+  dx = grid.dx
+  psi = u[1]
+  Pi = u[2]
+  psi_rhs = r[1]
+  Pi_rhs = r[2]
+
+  # derivatives
+  ddpsi = zeros(Float64, nx)
+  Derivs.derivs_2nd!(ddpsi, psi, dx, 4)
+
+  # dtu   = rho
+  # dtrho = ddu
+  for i = 1:nx
+    psi_rhs[i] = Pi[i]
+    Pi_rhs[i] = ddpsi[i]
+  end
+
 end
 
 end # module Physical
