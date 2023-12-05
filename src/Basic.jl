@@ -31,6 +31,7 @@ mutable struct Grid
     dx1 = (bnds[1][2] - bnds[1][1]) / (nx1 - 1)
     dt1 = cfl * dx1
     lev1 = Level(nx1, bnds[1], dt1)
+
     levs = Vector{Level}([lev1])
     for i = 2:length(bnds)
       dx = dx1 / 2^(i-1)
@@ -38,11 +39,20 @@ mutable struct Grid
       levl = levs[i-1]
       xnew = LinRange(levl.xmin, levl.xmax, (levl.nx - 1)*2 + 1)
       xmin = xnew[argmin(abs.(xnew .- bnds[i][1]))]
-      println("xmin = ", xmin)
       ncell = floor(Int, (bnds[i][2] - xmin) / dx)
       bnd = [xmin, xmin + ncell * dx]
       push!(levs, Level(ncell+1, bnd, dt))
     end
+    println("Grid Structure:")
+    for i = 1:length(levs)
+      println("lev[", i, "],")
+      println("  nx   = ", levs[i].nx)
+      println("  xmin = ", levs[i].xmin)
+      println("  xmax = ", levs[i].xmax)
+      println("  dx   = ", levs[i].dx)
+      println("  dt   = ", levs[i].dt)
+    end
+
     new(levs, t, dt1)
   end
 
