@@ -4,22 +4,24 @@ export Level, LevelFunction, Grid, GridFunction
 
 struct Level
 
-  nx::Int64
+  nx  ::Int64
   xmin::Float64
   xmax::Float64
-  dx::Float64
-  dt::Float64
+  dx  ::Float64
+  dt  ::Float64
+  time::Float64
 
-  function Level(nx, bnd, dt)
+  function Level(nx, bnd, dt, t)
     xmin = bnd[1]
     xmax = bnd[2]
     dx = (xmax - xmin) / (nx - 1)
-    new(nx, xmin, xmax, dx, dt)
+    new(nx, xmin, xmax, dx, dt, t)
   end
 
 end
 
 struct LevelFunction
+
   nd ::Int64
   lev::Level
   x  ::Array{Float64,1}
@@ -34,29 +36,27 @@ struct LevelFunction
     u_p = Array{Array{Float64,1},1}(undef, nd)
     rhs = Array{Array{Float64,1},1}(undef, nd)
     w   = Array{Array{Float64,1},1}(undef, nd)
-
-    nx = lev.nx
     for i = 1:nd
-      u[i]   = zeros(Float64, nx)
-      u_p[i] = zeros(Float64, nx)
-      rhs[i] = zeros(Float64, nx)
-      w[i]   = zeros(Float64, nx)
+      u[i]   = zeros(Float64, lev.nx)
+      u_p[i] = zeros(Float64, lev.nx)
+      rhs[i] = zeros(Float64, lev.nx)
+      w[i]   = zeros(Float64, lev.nx)
     end
     new(nd, lev, x, u, u_p, rhs, w)
   end
+
 end
 
 mutable struct Grid
 
   levs::Vector{Level}
-  time::Float64
   dt  ::Float64
+  time::Float64
 
   function Grid(nx1, bnds::Vector{Vector{Float64}}, cfl=0.4, t=0.0)
     dx1 = (bnds[1][2] - bnds[1][1]) / (nx1 - 1)
     dt1 = cfl * dx1
-    lev1 = Level(nx1, bnds[1], dt1)
-
+    lev1 = Level(nx1, bnds[1], dt1, t)
     levs = Vector{Level}([lev1])
     for i = 2:length(bnds)
       dx = dx1 / 2^(i-1)
@@ -65,9 +65,8 @@ mutable struct Grid
       xmin = xnew[argmin(abs.(xnew .- bnds[i][1]))]
       ncell = floor(Int, (bnds[i][2] - xmin) / dx)
       bnd = [xmin, xmin + ncell * dx]
-      push!(levs, Level(ncell+1, bnd, cfl * dx))
+      push!(levs, Level(ncell+1, bnd, cfl * dx, t))
     end
-
     println("Grid Structure:")
     for i = 1:length(levs)
       println("lev[", i, "],")
@@ -77,20 +76,19 @@ mutable struct Grid
       println("  dx   = ", levs[i].dx)
       println("  dt   = ", levs[i].dt)
     end
-
-    new(levs, t, dt1)
+    new(levs, dt1, t)
   end
 
 end
 
 struct GridFunction
 
-  nd   ::Int64
-  grid ::Grid
-  levfs::Vector{LevelFunction}
+  nd  ::Int64
+  grid::Grid
+  levs::Vector{LevelFunction}
 
   function GridFunction(nd, grid)
-    levfs = [LevelFunction(nd, lev) for lev in grid.lev]
+    levfs = [LevelFunction(nd, lev) for lev in grid.levs]
     new(nd, grid, levfs)
   end
 
