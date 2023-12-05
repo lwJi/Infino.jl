@@ -2,7 +2,7 @@ module Basic
 
 export Level, LevelFunction, Grid, GridFunction
 
-struct Level
+mutable struct Level
 
   nx  ::Int64
   xmin::Float64

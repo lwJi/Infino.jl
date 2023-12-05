@@ -1,63 +1,58 @@
 module ODESolver
 
-function Evolve!(gfs, itlast, out_every)
+function Evolve!(f::Function, gfs)
+  for l in 1:length(gfs.levs)
+    rk4!(f, gfs.levs[l])
+  end
 end
 
 ############################
 # Time Integration Methods #
 ############################
-function euler!(f::Function, gfs)
-
-  u = gfs.u
-  u_p = gfs.u_p
-  r = gfs.rhs
-  grid = gfs.grid
-  t = grid.time
-  dt = grid.dt
-  dx = grid.dx
-  x = grid.x
+function euler!(f::Function, levfs)
+  lev = levfs.lev
+  u   = levfs.u
+  u_p = levfs.u_p
+  r   = levfs.rhs
+  t  = lev.time
+  dt = lev.dt
 
   u_p = u
-  grid.time = t
-  f(grid, r, u)
+  lev.time = t
+  f(lev, r, u)
   @. u += r * dt
-  grid.time = t + dt
-
+  lev.time = t + dt
 end
 
-function rk4!(f::Function, gfs)
-
-  u = gfs.u
-  u_p = gfs.u_p
-  r = gfs.rhs
-  w = gfs.w
-  grid = gfs.grid
-  t = grid.time
-  dt = grid.dt
-  dx = grid.dx
-  x = grid.x
+function rk4!(f::Function, levfs)
+  lev = levfs.lev
+  u   = levfs.u
+  u_p = levfs.u_p
+  r   = levfs.rhs
+  w   = levfs.w
+  t  = lev.time
+  dt = lev.dt
 
   u_p = u
-  grid.time = t
-  f(grid, r, u)
+  lev.time = t
+  f(lev, r, u)
   @. u += r * (dt/6)
 
   @. w = u_p + r * (dt/2)
-  grid.time = t + 0.5 * dt
-  f(grid, r, w)
+  lev.time = t + 0.5 * dt
+  f(lev, r, w)
   @. u += r * (dt/3)
 
   @. w = u_p + r * (dt/2)
-  grid.time = t + 0.5 * dt
-  f(grid, r, w)
+  lev.time = t + 0.5 * dt
+  f(lev, r, w)
   @. u += r * (dt/3)
 
   @. w = u_p + r * dt
-  grid.time = t + dt
-  f(grid, r, w)
+  lev.time = t + dt
+  f(lev, r, w)
   @. u += r * (dt/6)
-  grid.time = t + dt
-
+  lev.time = t + dt
 end
 
 end
