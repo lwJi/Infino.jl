@@ -49,13 +49,13 @@ function main()
   out_every = params["out_every"]
   cfl = params["cfl"]
 
-  bbox = [[-4.0, 4.0]]
+  bbox = [[-4.0, 4.0], [-1.0, 1.0]]
   grid = Basic.Grid(nx, bbox, cfl)
   gfs = Basic.GridFunction(2, grid)
 
   yrange = (0, 1)
   a_psi = Animation()
-  a_Pi  = Animation()
+  a_Pi = Animation()
 
   ###############
   # Intial Data #
@@ -66,8 +66,10 @@ function main()
   @printf("Simulation time: %.4f, iteration %d. E = %.4f\n",
           gfs.grid.time, 0, Physical.Energy(gfs))
 
-  plt_psi = plot(gfs.levs[1].x, gfs.levs[1].u[1], ylim=(-1,1), labal="psi")
-  plt_Pi  = plot(gfs.levs[1].x, gfs.levs[1].u[2], ylim=(-4,4), labal="Pi")
+  plt_psi = plot(gfs.levs[1].x, gfs.levs[1].u[1], ylim=(-1,1), label="psi")
+  plt_psi = scatter!(gfs.levs[1].x, gfs.levs[1].u[1], label="")
+  plt_psi = scatter!(gfs.levs[2].x, gfs.levs[2].u[1], label="")
+  plt_Pi = plot(gfs.levs[1].x, gfs.levs[1].u[2], ylim=(-4,4), label="Pi")
   frame(a_psi, plt_psi)
   frame(a_Pi, plt_Pi)
 
@@ -81,8 +83,10 @@ function main()
             gfs.grid.time, i, Physical.Energy(gfs))
 
     if (mod(i, out_every) == 0)
-      plt_psi = plot(gfs.levs[1].x, gfs.levs[1].u[1], ylim=(-1,1), labal="psi")
-      plt_Pi  = plot(gfs.levs[1].x, gfs.levs[1].u[2], ylim=(-4,4), labal="Pi")
+      plt_psi = plot(gfs.levs[1].x, gfs.levs[1].u[1], ylim=(-1,1), label="psi")
+      plt_psi = scatter!(gfs.levs[1].x, gfs.levs[1].u[1], label="")
+      plt_psi = scatter!(gfs.levs[2].x, gfs.levs[2].u[1], label="")
+      plt_Pi = plot(gfs.levs[1].x, gfs.levs[1].u[2], ylim=(-4,4), label="Pi")
       frame(a_psi, plt_psi)
       frame(a_Pi, plt_Pi)
     end
