@@ -8,15 +8,13 @@ struct Level
   xmin::Float64
   xmax::Float64
   dx::Float64
-  x::Vector{Float64}
   dt::Float64
 
   function Level(nx, bnd, dt)
     xmin = bnd[1]
     xmax = bnd[2]
     dx = (xmax - xmin) / (nx - 1)
-    x = LinRange(xmin, xmax, nx)
-    new(nx, xmin, xmax, dx, x, dt)
+    new(nx, xmin, xmax, dx, dt)
   end
 
 end
@@ -24,6 +22,7 @@ end
 mutable struct Grid
 
   levs::Vector{Level}
+  xs::Vector{Vector{Float64}}
   time::Float64
   dt::Float64
 
@@ -33,6 +32,7 @@ mutable struct Grid
     lev1 = Level(nx1, bnds[1], dt1)
 
     levs = Vector{Level}([lev1])
+    xs = Vector{Vector{Float64}}([LinRange(lev1.xmin, lev1.xmax, lev1.nx)])
     for i = 2:length(bnds)
       dx = dx1 / 2^(i-1)
       dt = cfl * dx
@@ -41,8 +41,11 @@ mutable struct Grid
       xmin = xnew[argmin(abs.(xnew .- bnds[i][1]))]
       ncell = floor(Int, (bnds[i][2] - xmin) / dx)
       bnd = [xmin, xmin + ncell * dx]
-      push!(levs, Level(ncell+1, bnd, dt))
+      lev = Level(ncell+1, bnd, dt)
+      push!(levs, lev)
+      push!(xs, LinRange(lev.xmin, lev.xmax, lev.nx))
     end
+
     println("Grid Structure:")
     for i = 1:length(levs)
       println("lev[", i, "],")
@@ -53,7 +56,7 @@ mutable struct Grid
       println("  dt   = ", levs[i].dt)
     end
 
-    new(levs, t, dt1)
+    new(levs, xs, t, dt1)
   end
 
 end
@@ -62,22 +65,31 @@ struct GridF
 
   nd::Int64
   grid::Grid
-  u::Array{Array{Float64,1},1}
-  u_p::Array{Array{Float64,1},1}
-  rhs::Array{Array{Float64,1},1}
-  w::Array{Array{Float64,1},1}
+  u  ::Array{Array{Array{Float64,1},1},1}
+  u_p::Array{Array{Array{Float64,1},1},1}
+  rhs::Array{Array{Array{Float64,1},1},1}
+  w  ::Array{Array{Array{Float64,1},1},1}
 
   function GridF(nd, grid)
-    nx = grid.nx
-    u = Array{Array{Float64,1},1}(undef, nd)
-    u_p = Array{Array{Float64,1},1}(undef, nd)
-    rhs = Array{Array{Float64,1},1}(undef, nd)
-    w = Array{Array{Float64,1},1}(undef, nd)
+    nlev = length(grid.levs)
+    u   = Array{Array{Array{Float64,1},1},1}(undef, nd)
+    u_p = Array{Array{Array{Float64,1},1},1}(undef, nd)
+    rhs = Array{Array{Array{Float64,1},1},1}(undef, nd)
+    w   = Array{Array{Array{Float64,1},1},1}(undef, nd)
+
     for i = 1:nd
-      u[i] = zeros(Float64, nx)
-      u_p[i] = zeros(Float64, nx)
-      rhs[i] = zeros(Float64, nx)
-      w[i] = zeros(Float64, nx)
+      u[i]   = Array{Array{Float64,1},1}(undef, nlev)
+      u_p[i] = Array{Array{Float64,1},1}(undef, nlev)
+      rhs[i] = Array{Array{Float64,1},1}(undef, nlev)
+      w[i]   = Array{Array{Float64,1},1}(undef, nlev)
+
+      for l = 1:nlev
+        nx = grid.levs[l].nx
+        u[i][l]   = zeros(Float64, nx)
+        u_p[i][l] = zeros(Float64, nx)
+        rhs[i][l] = zeros(Float64, nx)
+        w[i][l]   = zeros(Float64, nx)
+      end
     end
     new(nd, grid, u, u_p, rhs, w)
   end
