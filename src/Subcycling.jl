@@ -20,6 +20,10 @@ function parse_commandline()
     help = "number of points in each direction"
     arg_type = Int
     default = 101
+    "--ngh"
+    help = "number of ghost points in each direction"
+    arg_type = Int
+    default = 2
     "--out_every"
     help = "output every so many steps"
     arg_type = Int
@@ -45,12 +49,13 @@ function main()
 
   params = parse_commandline()
   nx = params["nx"]
+  ngh = params["ngh"]
   itlast = params["itlast"]
   out_every = params["out_every"]
   cfl = params["cfl"]
 
   bbox = [[-4.0, 4.0], [-1.0, 1.0]]
-  grid = Basic.Grid(nx, bbox, cfl)
+  grid = Basic.Grid(nx, ngh, bbox, cfl)
   gfs = Basic.GridFunction(2, grid)
 
   yrange = (0, 1)

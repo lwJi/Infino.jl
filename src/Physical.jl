@@ -24,7 +24,7 @@ function WaveRHS!(lev, r, u)
   psi_rhs = r[1]
   Pi_rhs  = r[2]
   # derivatives
-  ddpsi = zeros(Float64, lev.nx)
+  ddpsi = zeros(Float64, lev.nxa)
   Derivs.derivs_2nd!(ddpsi, psi, lev.dx, 4)
 
   @. psi_rhs = Pi
@@ -32,15 +32,16 @@ function WaveRHS!(lev, r, u)
 end
 
 function Energy(gfs)
-  nx = gfs.grid.levs[1].nx
-  dx = gfs.grid.levs[1].dx
-  psi = gfs.levs[1].u[1]
-  Pi  = gfs.levs[1].u[2]
-  dpsi = zeros(Float64, nx)
+  ibox = gfs.grid.levs[1].ibox
+  nxa  = gfs.grid.levs[1].nxa
+  dx   = gfs.grid.levs[1].dx
+  psi  = gfs.levs[1].u[1]
+  Pi   = gfs.levs[1].u[2]
+  dpsi = zeros(Float64, nxa)
   Derivs.derivs_1st!(dpsi, psi, dx, 4)
 
   E::Float64 = 0.0
-  for i = 1:nx
+  for i = ibox[1]:ibox[2]
     E += (0.5 * Pi[i] * Pi[i] + 0.5 * dpsi[i] * dpsi[i])
   end
   return E * dx
