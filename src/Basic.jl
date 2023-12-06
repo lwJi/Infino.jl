@@ -75,6 +75,7 @@ mutable struct Grid
     for i = 1:length(levs)
       println("lev[", i, "],")
       println("  nx   = ", levs[i].nx)
+      println("  ngh  = ", levs[i].ngh)
       println("  xmin = ", levs[i].xbox[1])
       println("  xmax = ", levs[i].xbox[2])
       println("  dx   = ", levs[i].dx)
