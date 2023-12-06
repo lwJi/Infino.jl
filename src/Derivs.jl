@@ -45,14 +45,14 @@ end
 # for varlist #
 ###############
 function calc_du!(du::Array{Array{Float64,1},1}, u::Array{Array{Float64,1},1},
-    dx, ord=4)
+    dx, ord)
   for i = 1:length(u)
     derivs_1st!(du[i], u[i], dx, ord)
   end
 end
 
 function calc_ddu!(ddu::Array{Array{Float64,1},1}, u::Array{Array{Float64,1},1},
-    dx, ord=4)
+    dx, ord)
   for i = 1:length(u)
     derivs_2nd!(ddu[i], u[i], dx, ord)
   end
