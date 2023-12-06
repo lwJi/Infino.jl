@@ -67,8 +67,9 @@ function main()
           gfs.grid.time, 0, Physical.Energy(gfs))
 
   plt_psi = plot(gfs.levs[1].x, gfs.levs[1].u[1], ylim=(-1,1), label="psi")
-  plt_psi = scatter!(gfs.levs[1].x, gfs.levs[1].u[1], label="")
-  plt_psi = scatter!(gfs.levs[2].x, gfs.levs[2].u[1], label="")
+  for l = 1:length(gfs.levs)
+    plt_psi = scatter!(gfs.levs[l].x, gfs.levs[l].u[1], label="")
+  end
   plt_Pi = plot(gfs.levs[1].x, gfs.levs[1].u[2], ylim=(-4,4), label="Pi")
   frame(a_psi, plt_psi)
   frame(a_Pi, plt_Pi)
@@ -84,8 +85,9 @@ function main()
 
     if (mod(i, out_every) == 0)
       plt_psi = plot(gfs.levs[1].x, gfs.levs[1].u[1], ylim=(-1,1), label="psi")
-      plt_psi = scatter!(gfs.levs[1].x, gfs.levs[1].u[1], label="")
-      plt_psi = scatter!(gfs.levs[2].x, gfs.levs[2].u[1], label="")
+      for l = 1:length(gfs.levs)
+        plt_psi = scatter!(gfs.levs[l].x, gfs.levs[l].u[1], label="")
+      end
       plt_Pi = plot(gfs.levs[1].x, gfs.levs[1].u[2], ylim=(-4,4), label="Pi")
       frame(a_psi, plt_psi)
       frame(a_Pi, plt_Pi)

@@ -2,8 +2,12 @@ module ODESolver
 
 function Evolve!(f::Function, gfs)
   for l in 1:length(gfs.levs)
-    rk4!(f, gfs.levs[l])
+    substeps = 2^(l - 1)
+    for s in 1:substeps
+      rk4!(f, gfs.levs[l])
+    end
   end
+  gfs.grid.time = gfs.grid.levs[1].time
 end
 
 ############################
