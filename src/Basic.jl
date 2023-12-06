@@ -65,10 +65,18 @@ mutable struct Grid
     for i = 2:length(xboxs)
       dx = dx1 / 2^(i-1)
       levl = levs[i-1]
-      xnew = LinRange(levl.xbox[1], levl.xbox[2], (levl.nx - 1)*2 + 1)
-      xmin = xnew[argmin(abs.(xnew .- xboxs[i][1]))]
-      ncell = floor(Int, (xboxs[i][2] - xmin) / dx)
-      xbox = [xmin, xmin + ncell * dx]
+      # xnew = LinRange(levl.xbox[1], levl.xbox[2], (levl.nx - 1)*2 + 1)
+      # xmin = xnew[argmin(abs.(xnew .- xboxs[i][1]))]
+      # ncell = floor(Int, (xboxs[i][2] - xmin) / dx)
+      # xbox = [xmin, xmin + ncell * dx]
+      xl = LinRange(levl.xbox[1], levl.xbox[2], levl.nx)
+      xs = findall(x->abs(x - xboxs[i][1]) <= dx + eps(), xl)
+      xmin = minimum([xl[idx] for idx in
+                      findall(x->abs(x - xboxs[i][1]) <= dx + 1e-12, xl)])
+      xmax = maximum([xl[idx] for idx in
+                      findall(x->abs(x - xboxs[i][2]) <= dx + 1e-12, xl)])
+      xbox = [xmin, xmax]
+      ncell = floor(Int, (xmax - xmin) / dx)
       push!(levs, Level(ncell+1, ngh, xbox, cfl * dx, t))
     end
     println("Grid Structure:")
