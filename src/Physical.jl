@@ -32,7 +32,6 @@ function WaveRHS!(lev, r, u)
 end
 
 function Energy(gfs)
-  ibox = gfs.grid.levs[1].ibox
   nxa  = gfs.grid.levs[1].nxa
   ngh  = gfs.grid.levs[1].ngh
   dx   = gfs.grid.levs[1].dx
@@ -42,7 +41,7 @@ function Energy(gfs)
   Derivs.derivs_1st!(dpsi, psi, dx, ngh*2)
 
   E::Float64 = 0.0
-  for i = ibox[1]:ibox[2]
+  for i = 1+ngh:nxa-ngh
     E += (0.5 * Pi[i] * Pi[i] + 0.5 * dpsi[i] * dpsi[i])
   end
   return E * dx

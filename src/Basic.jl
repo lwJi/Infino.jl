@@ -7,15 +7,14 @@ mutable struct Level
   nx  ::Int64
   ngh ::Int64
   nxa ::Int64
-  ibox::Array{Int64,1}
+  ibox::Array{Int64,1} # index of current lev boundary in its parent grid array
   xbox::Array{Float64,1}
   dx  ::Float64
   dt  ::Float64
   time::Float64
 
-  function Level(nx, ngh, xbox, dt, t)
+  function Level(nx, ngh, ibox, xbox, dt, t)
     nxa = nx + 2*ngh
-    ibox = [1 + ngh, nxa - ngh]
     dx = (xbox[2] - xbox[1]) / (nx - 1)
     new(nx, ngh, nxa, ibox, xbox, dx, dt, t)
   end
@@ -60,7 +59,7 @@ mutable struct Grid
   function Grid(nx1, ngh, xboxs::Vector{Vector{Float64}}, cfl=0.4, t=0.0)
     dx1 = (xboxs[1][2] - xboxs[1][1]) / (nx1 - 1)
     dt1 = cfl * dx1
-    lev1 = Level(nx1, ngh, xboxs[1], dt1, t)
+    lev1 = Level(nx1, ngh, [1, nx1], xboxs[1], dt1, t)
     levs = Vector{Level}([lev1])
     for i = 2:length(xboxs)
       dx = dx1 / 2^(i-1)
@@ -71,13 +70,12 @@ mutable struct Grid
       # xbox = [xmin, xmin + ncell * dx]
       xl = LinRange(levl.xbox[1], levl.xbox[2], levl.nx)
       xs = findall(x->abs(x - xboxs[i][1]) <= dx + eps(), xl)
-      xmin = minimum([xl[idx] for idx in
-                      findall(x->abs(x - xboxs[i][1]) <= dx + 1e-12, xl)])
-      xmax = maximum([xl[idx] for idx in
-                      findall(x->abs(x - xboxs[i][2]) <= dx + 1e-12, xl)])
-      xbox = [xmin, xmax]
-      ncell = floor(Int, (xmax - xmin) / dx)
-      push!(levs, Level(ncell+1, ngh, xbox, cfl * dx, t))
+      imin = findall(x->abs(x - xboxs[i][1]) <= dx + 1e-12, xl)[1]
+      imax = findall(x->abs(x - xboxs[i][2]) <= dx + 1e-12, xl)[end]
+      ibox = [imin, imax]
+      xbox = [xl[imin], xl[imax]]
+      ncell = floor(Int, (xl[imax] - xl[imin]) / dx)
+      push!(levs, Level(ncell+1, ngh, ibox, xbox, cfl * dx, t))
     end
     println("Grid Structure:")
     for i = 1:length(levs)
