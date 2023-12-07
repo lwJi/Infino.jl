@@ -6,8 +6,9 @@ function main()
 
   nx = 101
   ngh = 2
+  nbuf = ngh * 3
   bnds = [[-4.0, 4.0], [0.6, 1.4], [0.8, 1.2]]
-  grid = Basic.Grid(nx, ngh, bnds)
+  grid = Basic.Grid(nx, bnds, ngh, nbuf)
 
   ax = Animation()
   x1 = LinRange(grid.levs[1].xbox[1], grid.levs[1].xbox[2], grid.levs[1].nx)

@@ -33,15 +33,15 @@ end
 
 function Energy(gfs)
   nxa  = gfs.grid.levs[1].nxa
-  ngh  = gfs.grid.levs[1].ngh
+  nbuf = gfs.grid.levs[1].nbuf
   dx   = gfs.grid.levs[1].dx
   psi  = gfs.levs[1].u[1]
   Pi   = gfs.levs[1].u[2]
   dpsi = zeros(Float64, nxa)
-  Derivs.derivs_1st!(dpsi, psi, dx, ngh*2)
+  Derivs.derivs_1st!(dpsi, psi, dx, lev.ngh*2)
 
   E::Float64 = 0.0
-  for i = 1+ngh:nxa-ngh
+  for i = 1+nbuf:nxa-nbuf
     E += (0.5 * Pi[i] * Pi[i] + 0.5 * dpsi[i] * dpsi[i])
   end
   return E * dx

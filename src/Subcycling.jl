@@ -55,7 +55,8 @@ function main()
   cfl = params["cfl"]
 
   bbox = [[-4.0, 4.0], [-1.0, 1.0]]
-  grid = Basic.Grid(nx, ngh, bbox, cfl)
+  nbuf = ngh * 3
+  grid = Basic.Grid(nx, bbox, ngh, nbuf, cfl)
   gfs = Basic.GridFunction(2, grid)
 
   yrange = (0, 1)
