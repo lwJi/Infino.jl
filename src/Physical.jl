@@ -38,7 +38,7 @@ function Energy(gfs)
   psi  = gfs.levs[1].u[1]
   Pi   = gfs.levs[1].u[2]
   dpsi = zeros(Float64, nxa)
-  Derivs.derivs_1st!(dpsi, psi, dx, lev.ngh*2)
+  Derivs.derivs_1st!(dpsi, psi, dx, gfs.grid.levs[1].ngh*2)
 
   E::Float64 = 0.0
   for i = 1+nbuf:nxa-nbuf
