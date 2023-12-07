@@ -27,7 +27,7 @@ function parse_commandline()
     "--out_every"
     help = "output every so many steps"
     arg_type = Int
-    default = 20
+    default = 10
     "--cfl"
     help = "Courant factor"
     arg_type = Float64
@@ -35,7 +35,7 @@ function parse_commandline()
     "--itlast"
     help = "maximum time steps"
     arg_type = Int
-    default = 500
+    default = 200
   end
   return parse_args(s)
 
