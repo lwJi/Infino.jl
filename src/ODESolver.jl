@@ -1,9 +1,14 @@
 module ODESolver
 
+include("Sync.jl")
+
 function Evolve!(f::Function, gfs)
   for l in 1:length(gfs.levs)
     substeps = 2^(l - 1)
     for s in 1:substeps
+      if (l > 1)
+        Sync.Prolongation(gfs, l, mod(s, 2) == 0)
+      end
       rk4!(f, gfs.levs[l])
     end
   end

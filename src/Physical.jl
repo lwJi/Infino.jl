@@ -1,7 +1,6 @@
 module Physical
 
 include("Derivs.jl")
-using .Derivs
 
 function InitialData!(gfs)
   amp = 1.0
