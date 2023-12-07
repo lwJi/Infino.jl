@@ -78,7 +78,7 @@ mutable struct Grid
       # imax = findall(x->abs(x - xboxs[i][2]) <= dx + 1e-12, xl)[end]
       xbox = [xl[imin], xl[imax]]
       nx = (imax - imin) + 1  #  (floor(Int, (xl[imax] - xl[imin]) / dx)) + 1
-      ir2c = div.(((imin-nbuf:imax+nbuf) .+ 1), 2)
+      ir2c = div.(((imin-nbuf:imax+nbuf) .+ 1), 2) .+ nbuf
       align = mod.(((imin-nbuf:imax+nbuf) .+ 1), 2) .== 0
       push!(levs, Level(nx, ngh, nbuf, xbox, cfl * dx, t, ir2c, align))
     end
