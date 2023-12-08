@@ -7,6 +7,7 @@ using WriteVTK
 include("Basic.jl")
 include("ODESolver.jl")
 include("Physical.jl")
+include("WriteIO.jl")
 
 #using .Basic
 #using .ODESolver
@@ -59,10 +60,6 @@ function main()
   grid = Basic.Grid(nx, bbox, ngh, nbuf, cfl)
   gfs = Basic.GridFunction(2, grid)
 
-  xrange = (-4.7, 4.7)
-  a_psi = Animation()
-  a_Pi = Animation()
-
   ###############
   # Intial Data #
   ###############
@@ -72,15 +69,7 @@ function main()
   @printf("Simulation time: %.4f, iteration %d. E = %.4f\n",
           gfs.grid.time, 0, Physical.Energy(gfs))
 
-  plt_psi = plot(gfs.levs[1].x, gfs.levs[1].u[1],
-                 xlim=xrange, ylim=(-0.5,0.5), label="psi")
-  for l = 1:length(gfs.levs)
-    plt_psi = scatter!(gfs.levs[l].x, gfs.levs[l].u[1], label="")
-  end
-  plt_Pi = plot(gfs.levs[1].x, gfs.levs[1].u[2],
-                xlim=xrange, ylim=(-4,4), label="Pi")
-  frame(a_psi, plt_psi)
-  frame(a_Pi, plt_Pi)
+  WriteIO.dump(gfs, 0)
 
   ##########
   # Evolve #
@@ -92,21 +81,9 @@ function main()
             gfs.grid.time, i, Physical.Energy(gfs))
 
     if (mod(i, out_every) == 0)
-      plt_psi = plot(gfs.levs[1].x, gfs.levs[1].u[1],
-                     xlim=xrange, ylim=(-0.5,0.5), label="psi")
-      for l = 1:length(gfs.levs)
-        plt_psi = scatter!(gfs.levs[l].x, gfs.levs[l].u[1], label="")
-      end
-      plt_Pi = plot(gfs.levs[1].x, gfs.levs[1].u[2],
-                    xlim=xrange, ylim=(-4,4), label="Pi")
-      frame(a_psi, plt_psi)
-      frame(a_Pi, plt_Pi)
+      WriteIO.dump(gfs, i)
     end
   end
-
-  # output
-  gif(a_psi, "psi.gif")
-  gif(a_Pi, "Pi.gif")
 
   ########
   # Exit #
