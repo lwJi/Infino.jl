@@ -55,7 +55,7 @@ function main()
   cfl = params["cfl"]
 
   bbox = [[-4.0, 4.0], [-1.0, 1.0]]
-  nbuf = ngh * 3
+  nbuf = ngh * 4
   grid = Basic.Grid(nx, bbox, ngh, nbuf, cfl)
   gfs = Basic.GridFunction(2, grid)
 
@@ -73,7 +73,7 @@ function main()
           gfs.grid.time, 0, Physical.Energy(gfs))
 
   plt_psi = plot(gfs.levs[1].x, gfs.levs[1].u[1],
-                 xlim=xrange, ylim=(-1,1), label="psi")
+                 xlim=xrange, ylim=(-0.5,0.5), label="psi")
   for l = 1:length(gfs.levs)
     plt_psi = scatter!(gfs.levs[l].x, gfs.levs[l].u[1], label="")
   end
@@ -93,7 +93,7 @@ function main()
 
     if (mod(i, out_every) == 0)
       plt_psi = plot(gfs.levs[1].x, gfs.levs[1].u[1],
-                     xlim=xrange, ylim=(-1,1), label="psi")
+                     xlim=xrange, ylim=(-0.5,0.5), label="psi")
       for l = 1:length(gfs.levs)
         plt_psi = scatter!(gfs.levs[l].x, gfs.levs[l].u[1], label="")
       end

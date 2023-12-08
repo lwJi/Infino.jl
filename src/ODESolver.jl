@@ -26,7 +26,7 @@ function euler!(f::Function, levfs)
   t  = lev.time
   dt = lev.dt
 
-  u_p = u
+  @. u_p = u
   lev.time = t
   f(lev, r, u)
   @. u += r * dt
@@ -42,7 +42,7 @@ function rk4!(f::Function, levfs)
   t  = lev.time
   dt = lev.dt
 
-  u_p = u
+  @. u_p = u
   lev.time = t
   f(lev, r, u)
   @. u += r * (dt/6)

@@ -4,7 +4,7 @@ include("Derivs.jl")
 
 function InitialData!(gfs)
   amp = 1.0
-  sig = 0.1
+  sig = 0.2
   x0  = 0.0
 
   for l = 1:length(gfs.levs)
