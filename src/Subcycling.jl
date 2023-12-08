@@ -37,6 +37,10 @@ function parse_commandline()
     help = "maximum time steps"
     arg_type = Int
     default = 200
+    "--ggif"
+    help = "if generate gifs"
+    arg_type = Bool
+    default = false
   end
   return parse_args(s)
 
@@ -53,6 +57,7 @@ function main()
   ngh = params["ngh"]
   itlast = params["itlast"]
   out_every = params["out_every"]
+  ggif = params["ggif"]
   cfl = params["cfl"]
 
   bbox = [[-4.0, 4.0], [-1.0, 1.0]]
@@ -91,6 +96,13 @@ function main()
   println("-------------------------------------------------------------------")
   println("  Successfully Done")
   println("-------------------------------------------------------------------")
+
+  #################
+  # Generate gifs #
+  #################
+  if ggif
+    WriteIO.generate_gifs("data")
+  end
 
 end
 
