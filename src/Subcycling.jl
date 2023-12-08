@@ -28,10 +28,6 @@ function parse_commandline()
     help = "output every so many steps"
     arg_type = Int
     default = 10
-    "--xrange"
-    help = "xlim for plots"
-    arg_type = Tuple{Float64, Float64}
-    default = (-4.7, 4.7)
     "--cfl"
     help = "Courant factor"
     arg_type = Float64
@@ -56,7 +52,6 @@ function main()
   ngh = params["ngh"]
   itlast = params["itlast"]
   out_every = params["out_every"]
-  xrange = params["xrange"]
   cfl = params["cfl"]
 
   bbox = [[-4.0, 4.0], [-1.0, 1.0]]
@@ -64,7 +59,7 @@ function main()
   grid = Basic.Grid(nx, bbox, ngh, nbuf, cfl)
   gfs = Basic.GridFunction(2, grid)
 
-  yrange = (0, 1)
+  xrange = (-4.7, 4.7)
   a_psi = Animation()
   a_Pi = Animation()
 
