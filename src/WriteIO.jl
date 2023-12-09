@@ -47,7 +47,7 @@ function generate_gifs(dir_path)
         for l in 1:Int(maximum(data[:, 3]))
           x   = data[findall(x -> x == l, data[:, 3]), 5]
           psi = data[findall(x -> x == l, data[:, 3]), 6]
-          plt_psi = scatter!(x, psi)
+          plt_psi = scatter!(x, psi, label="")
         end
         frame(a_psi, plt_psi)
         # plot Pi
@@ -57,7 +57,7 @@ function generate_gifs(dir_path)
         #for l in 1:Int(maximum(data[:, 3]))
         #  x  = data[findall(x -> x == l, data[:, 3]), 5]
         #  Pi = data[findall(x -> x == l, data[:, 3]), 7]
-        #  plt_Pi = scatter!(x, Pi)
+        #  plt_Pi = scatter!(x, Pi, label="")
         #end
         frame(a_Pi, plt_Pi)
       end
