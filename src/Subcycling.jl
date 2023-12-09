@@ -74,7 +74,7 @@ function main()
   @printf("Simulation time: %.4f, iteration %d. E = %.4f\n",
           gfs.grid.time, 0, Physical.Energy(gfs))
 
-  WriteIO.dump(gfs, 0)
+  WriteIO.dump("data", gfs, 0)
 
   ##########
   # Evolve #
@@ -86,7 +86,7 @@ function main()
             gfs.grid.time, i, Physical.Energy(gfs))
 
     if (mod(i, out_every) == 0)
-      WriteIO.dump(gfs, i)
+      WriteIO.dump("data", gfs, i)
     end
   end
 
