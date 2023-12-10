@@ -5,7 +5,7 @@ function Prolongation(gfs, l, interp_in_time::Bool)
   nxa   = levl.nxa
   nbuf  = levl.nbuf
   if2c  = levl.if2c
-  align = levl.align
+  aligned = levl.aligned
   levsfs = gfs.levs
 
   for v in 1:gfs.nd
@@ -17,10 +17,10 @@ function Prolongation(gfs, l, interp_in_time::Bool)
         ir = nxa - il + 1
         icl = if2c[il]
         icr = if2c[ir]
-        u[il] = ((align[il])
+        u[il] = ((aligned[il])
                  ? (uc[icl] + uc_p[icl]) * 0.5
                  : (uc[icl] + uc[icl+1] + uc_p[icl] + uc_p[icl+1]) * 0.25)
-        u[ir] = ((align[ir])
+        u[ir] = ((aligned[ir])
                  ? (uc[icr] + uc_p[icr]) * 0.5
                  : (uc[icr] + uc[icr+1] + uc_p[icr] + uc_p[icr+1]) * 0.25)
       end
@@ -29,8 +29,8 @@ function Prolongation(gfs, l, interp_in_time::Bool)
         ir = nxa - il + 1
         icl = if2c[il]
         icr = if2c[ir]
-        u[il] = ((align[il]) ? uc_p[icl] : (uc_p[icl] + uc_p[icl+1]) * 0.5)
-        u[ir] = ((align[ir]) ? uc_p[icr] : (uc_p[icr] + uc_p[icr+1]) * 0.5)
+        u[il] = ((aligned[il]) ? uc_p[icl] : (uc_p[icl] + uc_p[icl+1]) * 0.5)
+        u[ir] = ((aligned[ir]) ? uc_p[icr] : (uc_p[icr] + uc_p[icr+1]) * 0.5)
       end
     end
   end

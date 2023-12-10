@@ -14,12 +14,12 @@ mutable struct Level
   time::Float64
   # dimension nxa
   if2c::Array{Int64,1}  # map between indexes of current and its parent level
-  align::Array{Bool,1}  # if grid align with coarse grid
+  aligned::Array{Bool,1}  # if grid aligned with coarse grid
 
-  function Level(nx, ngh, nbuf, xbox, dt, t, if2c, align)
+  function Level(nx, ngh, nbuf, xbox, dt, t, if2c, aligned)
     nxa = nx + 2*nbuf
     dx = (xbox[2] - xbox[1]) / (nx - 1)
-    new(nx, ngh, nbuf, nxa, xbox, dx, dt, t, if2c, align)
+    new(nx, ngh, nbuf, nxa, xbox, dx, dt, t, if2c, aligned)
   end
 
 end
@@ -79,8 +79,8 @@ mutable struct Grid
       xbox = [xl[imin], xl[imax]]
       nx = (imax - imin) + 1  #  (floor(Int, (xl[imax] - xl[imin]) / dx)) + 1
       if2c = div.(((imin-nbuf:imax+nbuf) .+ 1), 2) .+ nbuf
-      align = mod.(((imin-nbuf:imax+nbuf) .+ 1), 2) .== 0
-      push!(levs, Level(nx, ngh, nbuf, xbox, cfl * dx, t, if2c, align))
+      aligned = mod.(((imin-nbuf:imax+nbuf) .+ 1), 2) .== 0
+      push!(levs, Level(nx, ngh, nbuf, xbox, cfl * dx, t, if2c, aligned))
     end
     println("Grid Structure:")
     for i = 1:length(levs)
@@ -93,14 +93,14 @@ mutable struct Grid
                 [levs[i].if2c[1+levs[i].nbuf],
                  levs[i].if2c[levs[i].nxa-levs[i].nbuf]],
                 ", ",
-                [levs[i].align[1+levs[i].nbuf],
-                 levs[i].align[levs[i].nxa-levs[i].nbuf]])
+                [levs[i].aligned[1+levs[i].nbuf],
+                 levs[i].aligned[levs[i].nxa-levs[i].nbuf]])
       end
       println("  xbox = ", levs[i].xbox)
       println("  dx   = ", levs[i].dx)
       println("  dt   = ", levs[i].dt)
       # println("  if2c = ", levs[i].if2c)
-      # println("  align= ", levs[i].align)
+      # println("  aligned= ", levs[i].aligned)
     end
     new(levs, dt1, t)
   end
