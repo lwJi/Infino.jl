@@ -3,15 +3,44 @@ module ODESolver
 include("Sync.jl")
 
 function Evolve!(f::Function, gfs)
-  for l in 1:length(gfs.levs)
-    substeps = 2^(l - 1)
-    for s in 1:substeps
-      if (l > 1)
-        Sync.Prolongation(gfs, l, mod(s, 2) == 0)
-      end
-      rk4!(f, gfs.levs[l])
+  tiny = 1e-12
+  lmax = length(gfs.levs)
+
+  #----------------------------------------#
+  # march the first substep for all levels #
+  #----------------------------------------#
+  for l in 1:lmax
+    if l > 1
+      Sync.Prolongation(gfs, l, false)
     end
+    rk4!(f, gfs.levs[l])
   end
+
+  #-------------------------#
+  # march the rest substeps #
+  #-------------------------#
+  substeps = ones(Int64, lmax)
+  dt_min = gfs.grid.levs[lmax].dt
+  for s in 2:2^(lmax-1)
+    # march levels except coarest and finest ones
+    for l in 2:lmax-1
+      if ((abs(gfs.grid.levs[l+1].time - gfs.grid.levs[l].time) < tiny)
+          && (abs(gfs.grid.levs[1].time - gfs.grid.levs[l].time) > dt_min))
+        substeps[l] += 1
+        #Sync.Restriction()
+        Sync.Prolongation(gfs, l, mod(substeps[l], 2) == 0)
+        rk4!(f, gfs.levs[l])
+      end
+    end
+    # march the finest level
+    substeps[lmax] += 1
+    Sync.Prolongation(gfs, lmax, mod(s, 2) == 0)
+    rk4!(f, gfs.levs[lmax])
+  end
+
+  #------------------#
+  # update grid time #
+  #------------------#
   gfs.grid.time = gfs.grid.levs[1].time
 end
 
