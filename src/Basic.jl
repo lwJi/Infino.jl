@@ -13,13 +13,13 @@ mutable struct Level
   dt  ::Float64
   time::Float64
   # dimension nxa
-  ir2c::Array{Int64,1}  # map between indexes of current and its parent level
+  if2c::Array{Int64,1}  # map between indexes of current and its parent level
   align::Array{Bool,1}  # if grid align with coarse grid
 
-  function Level(nx, ngh, nbuf, xbox, dt, t, ir2c, align)
+  function Level(nx, ngh, nbuf, xbox, dt, t, if2c, align)
     nxa = nx + 2*nbuf
     dx = (xbox[2] - xbox[1]) / (nx - 1)
-    new(nx, ngh, nbuf, nxa, xbox, dx, dt, t, ir2c, align)
+    new(nx, ngh, nbuf, nxa, xbox, dx, dt, t, if2c, align)
   end
 
 end
@@ -78,9 +78,9 @@ mutable struct Grid
       # imax = findall(x->abs(x - xboxs[i][2]) <= dx + 1e-12, xl)[end]
       xbox = [xl[imin], xl[imax]]
       nx = (imax - imin) + 1  #  (floor(Int, (xl[imax] - xl[imin]) / dx)) + 1
-      ir2c = div.(((imin-nbuf:imax+nbuf) .+ 1), 2) .+ nbuf
+      if2c = div.(((imin-nbuf:imax+nbuf) .+ 1), 2) .+ nbuf
       align = mod.(((imin-nbuf:imax+nbuf) .+ 1), 2) .== 0
-      push!(levs, Level(nx, ngh, nbuf, xbox, cfl * dx, t, ir2c, align))
+      push!(levs, Level(nx, ngh, nbuf, xbox, cfl * dx, t, if2c, align))
     end
     println("Grid Structure:")
     for i = 1:length(levs)
@@ -88,10 +88,10 @@ mutable struct Grid
       println("  nx   = ", levs[i].nx)
       println("  ngh  = ", levs[i].ngh)
       println("  nbuf = ", levs[i].nbuf)
-      if (length(levs[i].ir2c) == levs[i].nxa)
+      if (length(levs[i].if2c) == levs[i].nxa)
         println("  ibox = ",
-                [levs[i].ir2c[1+levs[i].nbuf],
-                 levs[i].ir2c[levs[i].nxa-levs[i].nbuf]],
+                [levs[i].if2c[1+levs[i].nbuf],
+                 levs[i].if2c[levs[i].nxa-levs[i].nbuf]],
                 ", ",
                 [levs[i].align[1+levs[i].nbuf],
                  levs[i].align[levs[i].nxa-levs[i].nbuf]])
@@ -99,7 +99,7 @@ mutable struct Grid
       println("  xbox = ", levs[i].xbox)
       println("  dx   = ", levs[i].dx)
       println("  dt   = ", levs[i].dt)
-      # println("  ir2c = ", levs[i].ir2c)
+      # println("  if2c = ", levs[i].if2c)
       # println("  align= ", levs[i].align)
     end
     new(levs, dt1, t)
