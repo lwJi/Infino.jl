@@ -38,7 +38,21 @@ function Prolongation(gfs, l, interp_in_time::Bool)
   end
 end
 
-function Restriction()
+function Restriction(gfs, l)
+  nxa     = gfs.grid.levs[l+1].nxa
+  nbuf    = gfs.grid.levs[l+1].nbuf
+  if2c    = gfs.grid.levs[l+1].if2c
+  aligned = gfs.grid.levs[l+1].aligned
+  levsfs  = gfs.levs
+  for v in 1:gfs.nd
+    uf = levsfs[l+1].u[v]
+    uc = levsfs[l].u[v]
+    for f in 1+nbuf:nxa-nbuf
+      if aligned[f]
+        uc[if2c[f]] = uf[f]
+      end
+    end
+  end
 end
 
 end

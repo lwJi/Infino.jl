@@ -27,7 +27,7 @@ function Evolve!(f::Function, gfs)
       if ((abs(gfs.grid.levs[l+1].time - gfs.grid.levs[l].time) < tiny)
           && (abs(gfs.grid.levs[1].time - gfs.grid.levs[l].time) > dt_min))
         substeps[l] += 1
-        #Sync.Restriction()
+        Sync.Restriction(gfs, l)
         Sync.Prolongation(gfs, l, mod(substeps[l], 2) == 0)
         rk4!(f, gfs.levs[l])
       end
@@ -36,6 +36,13 @@ function Evolve!(f::Function, gfs)
     substeps[lmax] += 1
     Sync.Prolongation(gfs, lmax, mod(s, 2) == 0)
     rk4!(f, gfs.levs[lmax])
+  end
+
+  #------------------------#
+  # Restriction all levels #
+  #------------------------#
+  for l in lmax-1:-1:1
+    Sync.Restriction(gfs, l)
   end
 
   #------------------#
