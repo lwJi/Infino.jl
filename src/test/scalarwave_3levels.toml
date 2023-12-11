@@ -1,0 +1,9 @@
+[parameters]
+bbox = [[-4.0, 4.0], [-1.0, 1.0], [-0.5, 0.5]]  # computational domain
+cfl  = 0.25
+nx        = 101
+ngh       = 2
+itlast    = 40
+out_every = 10
+ggif = true
+# out_dir = "data"
