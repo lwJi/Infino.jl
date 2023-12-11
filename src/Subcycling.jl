@@ -1,7 +1,7 @@
-using ArgParse
 using LinearAlgebra
 using Plots
 using Printf
+using TOML
 using WriteVTK
 
 include("Basic.jl")
@@ -10,41 +10,6 @@ include("Physical.jl")
 include("WriteIO.jl")
 
 #using .Basic
-#using .ODESolver
-#using .Physical
-
-function parse_commandline()
-
-  s = ArgParseSettings()
-  @add_arg_table s begin
-    "--nx", "-n"
-    help = "number of points in each direction"
-    arg_type = Int
-    default = 101
-    "--ngh"
-    help = "number of ghost points in each direction"
-    arg_type = Int
-    default = 2
-    "--out_every"
-    help = "output every so many steps"
-    arg_type = Int
-    default = 10
-    "--cfl"
-    help = "Courant factor"
-    arg_type = Float64
-    default = 0.25
-    "--itlast"
-    help = "maximum time steps"
-    arg_type = Int
-    default = 200
-    "--ggif"
-    help = "if generate gifs"
-    arg_type = Bool
-    default = false
-  end
-  return parse_args(s)
-
-end
 
 function main()
 
@@ -52,15 +17,49 @@ function main()
   println("  Welcome to Subcycling Test !!!  ")
   println("===================================================================")
 
-  params = parse_commandline()
-  nx = params["nx"]
-  ngh = params["ngh"]
-  itlast = params["itlast"]
-  out_every = params["out_every"]
-  ggif = params["ggif"]
-  cfl = params["cfl"]
+  if length(ARGS) < 1
+    println("Usage: julia Subcycling.jl parfile.toml")
+    exit(1)
+  end
 
-  bbox = [[-4.0, 4.0], [-1.0, 1.0]]
+  ########################
+  # Read Parameter Files #
+  ########################
+  pars_path = ARGS[1]
+  pars = TOML.parsefile(pars_path)
+  bbox      = pars["parameters"]["bbox"]
+  cfl       = pars["parameters"]["cfl"]
+  nx        = pars["parameters"]["nx"]
+  ngh       = pars["parameters"]["ngh"]
+  itlast    = pars["parameters"]["itlast"]
+  out_every = pars["parameters"]["out_every"]
+  bbox      = pars["parameters"]["bbox"]
+  if haskey(pars["parameters"], "ggif")
+    ggif = pars["parameters"]["ggif"]
+  else
+    ggif = false
+  end
+  if haskey(pars["parameters"], "out_dir")
+    out_dir_base = pars["parameters"]["out_dir"]
+  else
+    out_dir_base = splitext(basename(pars_path))[1]
+  end
+  out_dir = joinpath(dirname(pars_path), out_dir_base)
+  # print pars
+  println("Parameters:")
+  println("  cfl       = ", cfl)
+  println("  itlast    = ", itlast)
+  println("  out_every = ", out_every)
+  println("  ggif      = ", ggif)
+  println("  out_dir   = ", out_dir)
+  # create output dir
+  if isdir(out_dir)
+    println("Removing old directory '$out_dir'...")
+    rm(out_dir, recursive=true)
+  end
+  println("Creating new directory '$out_dir'...")
+  mkdir(out_dir)
+  # build grid structure
   nbuf = ngh * 4
   grid = Basic.Grid(nx, bbox, ngh, nbuf, cfl)
   gfs = Basic.GridFunction(2, grid)
@@ -74,7 +73,7 @@ function main()
   @printf("Simulation time: %.4f, iteration %d. E = %.4f\n",
           gfs.grid.time, 0, Physical.Energy(gfs))
 
-  WriteIO.dump("data", gfs, 0)
+  WriteIO.dump(out_dir, gfs, 0)
 
   ##########
   # Evolve #
@@ -86,7 +85,7 @@ function main()
             gfs.grid.time, i, Physical.Energy(gfs))
 
     if (mod(i, out_every) == 0)
-      WriteIO.dump("data", gfs, i)
+      WriteIO.dump(out_dir, gfs, i)
     end
   end
 
@@ -101,7 +100,7 @@ function main()
   # Generate gifs #
   #################
   if ggif
-    WriteIO.generate_gifs("data")
+    WriteIO.generate_gifs(out_dir)
   end
 
 end
