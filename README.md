@@ -2,11 +2,19 @@
 
 [![Build Status](https://github.com/lwJi/Infino.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/lwJi/Infino.jl/actions/workflows/CI.yml?query=branch%3Amain)
 
-## Run `test`
+## Installation
+
+1. Clone the repo: `git clone git@github.com:lwJi/Infino.jl.git`
+
+2. Add **Infino** to your Pkg environment: `] dev \path\to\the\repo`
+
+3. Import **Infino**: `using Skylight`
+
+## Run an example
 
 ```bash
-cd src
-julia Subcycling.jl test/scalarwave_3levels.toml
+julia run/Subcycling.jl test/unit/scalarwave_3levels.toml
+julia tool/generate_gifs.jl test/unit/scalarwave_3levels/
 ```
 
 ## Refs
