@@ -1,6 +1,6 @@
-#using Subcycling
+using Infino
 using Test
 
-@testset "Subcycling.jl" begin
+@testset "Infino.jl" begin
     # Write your tests here.
 end
