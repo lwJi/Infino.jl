@@ -1,7 +1,6 @@
 # Subcycling
 
-* [![GitHub
-  CI](https://github.com/lwJi/Subcycling/workflows/CI/badge.svg)](https://github.com/lwJi/Subcycling/actions)
+[![Build Status](https://github.com/lwJi/Subcycling.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/lwJi/Subcycling.jl/actions/workflows/CI.yml?query=branch%3Amain)
 
 ## Run `test`
 
