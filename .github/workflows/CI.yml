@@ -1,0 +1,60 @@
+name: CI
+
+# Control when the workflow will run
+on:
+  push:
+    branches:
+      - main
+    tags: ['*']
+  pull_request:
+
+# concurrency:
+#   # Skip intermediate builds: always.
+#   # Cancel intermediate builds: only if it is a pull request build.
+#   group: ${{ github.workflow }}-${{ github.ref }}
+#   cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  test:
+    name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        version:
+          - '1.9.0'
+          - '1.6.7'
+        os:
+          - [ubuntu-latest] #, windows-latest, macOS-latest]
+        arch:
+          - x64
+        exclude:
+          - os: macOS-latest
+          - arch: x86
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Check out the repository under $GITHUB_WORKSPACE, so our job can access it
+      - uses: actions/checkout@v2
+
+      # Set up Julia
+      - uses: julia-actions/setup-julia@v1
+        with:
+          version: ${{ matrix.version }}
+          arch: ${{ matrix.arch }}
+
+      - uses: julia-actions/cache@v1
+      - uses: julia-actions/julia-buildpkg@v1
+      - uses: julia-actions/julia-runtest@v1
+      # - uses: julia-actions/julia-processcoverage@v1
+      #   with: 
+      #     directories: src
+      # - uses: codecov/codecov-action@v2
+      #   with:
+      #     files: lcov.info
+      # - uses: julia-actions/julia-uploadcoveralls@v1
+      #   env:
+      #     COVERALLS_TOKEN: ${{ secrets.COVERALLS_TOKEN }}

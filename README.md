@@ -1,5 +1,8 @@
 # Subcycling
 
+* [![GitHub
+  CI](https://github.com/lwJi/Subcycling/workflows/CI/badge.svg)](https://github.com/lwJi/Subcycling/actions)
+
 ## Run `test`
 
 ```bash
