@@ -1,7 +1,6 @@
-using Test, SafeTestsets
+#using Subcycling
+using Test
 
-@time begin
-  @safetestset "scalarwave" begin
-    include("../src/example/Test.jl")
-  end
+@testset "Subcycling.jl" begin
+    # Write your tests here.
 end
