@@ -8,7 +8,7 @@
 
 2. Add **Infino** to your Pkg environment: `] dev \path\to\the\repo`
 
-3. Import **Infino**: `using Skylight`
+3. Import **Infino**: `using Infino`
 
 ## Run an example
 
