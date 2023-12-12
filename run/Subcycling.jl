@@ -52,31 +52,31 @@ function main()
   mkdir(out_dir)
   # build grid structure
   nbuf = ngh * 4
-  grid = Basic.Grid(nx, bbox, ngh, nbuf, cfl)
-  gfs = Basic.GridFunction(2, grid)
+  grid = Infino.Basic.Grid(nx, bbox, ngh, nbuf, cfl)
+  gfs = Infino.Basic.GridFunction(2, grid)
 
   ###############
   # Intial Data #
   ###############
   println("Setting up initial conditions...")
-  Physical.InitialData!(gfs)
+  Infino.Physical.InitialData!(gfs)
 
   @printf("Simulation time: %.4f, iteration %d. E = %.4f\n",
-          gfs.grid.time, 0, Physical.Energy(gfs))
+          gfs.grid.time, 0, Infino.Physical.Energy(gfs))
 
-  WriteIO.dump(out_dir, gfs, 0)
+  Infino.WriteIO.dump(out_dir, gfs, 0)
 
   ##########
   # Evolve #
   ##########
   println("Start evolution...")
   for i = 1:itlast
-    ODESolver.Evolve!(Physical.WaveRHS!, gfs)
+    Infino.ODESolver.Evolve!(Infino.Physical.WaveRHS!, gfs)
     @printf("Simulation time: %.4f, iteration %d. E = %.4f\n",
-            gfs.grid.time, i, Physical.Energy(gfs))
+            gfs.grid.time, i, Infino.Physical.Energy(gfs))
 
     if (mod(i, out_every) == 0)
-      WriteIO.dump(out_dir, gfs, i)
+      Infino.WriteIO.dump(out_dir, gfs, i)
     end
   end
 
