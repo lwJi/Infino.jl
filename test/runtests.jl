@@ -4,6 +4,6 @@ using SafeTestsets
 
 @time begin
   @safetestset "Basic" begin
-    include("unit/basis.jl")
+    include("unit/basic.jl")
   end
 end
