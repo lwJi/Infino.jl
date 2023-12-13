@@ -15,8 +15,8 @@ Infrastructure to test Subcycling
 ## Run an example
 
 ```bash
-julia run/Subcycling.jl test/unit/scalarwave_3levels.toml
-julia tool/generate_gifs.jl test/unit/scalarwave_3levels/
+julia run/Subcycling.jl test/integration/scalarwave_3levels.toml
+julia tool/generate_gifs.jl test/integration/scalarwave_3levels/
 ```
 
 ## Refs
