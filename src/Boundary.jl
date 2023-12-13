@@ -1,6 +1,5 @@
 module Boundary
 
-function ApplyPeriodicBoundaryCondition!(gfs)
-end
+function ApplyPeriodicBoundaryCondition!(gfs) end
 
 end

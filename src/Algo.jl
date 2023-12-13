@@ -1,6 +1,5 @@
 module Algo
 
-function Interpolation()
-end
+function Interpolation() end
 
 end
