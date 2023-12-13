@@ -1,6 +1,9 @@
 using Infino
 using Test
+using SafeTestsets
 
-@testset "Infino.jl" begin
-    # Write your tests here.
+@time begin
+  @safetestset "Basic" begin
+    include("unit/basis.jl")
+  end
 end
