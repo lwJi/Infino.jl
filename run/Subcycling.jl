@@ -52,7 +52,7 @@ function main()
     mkdir(out_dir)
     # build grid structure
     nbuf = ngh * 4
-    grid = Infino.Basic.Grid(nx, bbox, ngh, nbuf, cfl)
+    grid = Infino.Basic.Grid(nx, bbox, ngh, nbuf; cfl = cfl)
     gfs = Infino.Basic.GridFunction(2, grid)
 
     ###############
@@ -76,6 +76,7 @@ function main()
     println("Start evolution...")
     for i = 1:itlast
         Infino.ODESolver.Evolve!(Infino.Physical.WaveRHS!, gfs)
+        Infino.Boundary.ApplyPeriodicBoundaryCondition!(gfs)
         @printf(
             "Simulation time: %.4f, iteration %d. E = %.4f\n",
             gfs.grid.time,
