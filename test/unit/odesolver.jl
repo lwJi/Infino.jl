@@ -12,7 +12,7 @@ function analytical_solution(t)
 end
 
 @testset "Euler Method Tests" begin
-    g = Infino.Basic.Grid(2, [[-1.0, 1.0]], 0, 0, 0.005)
+    g = Infino.Basic.Grid(2, [[-1.0, 1.0]], 0, 0; cfl = 0.005, verbose = false)
     gfs = Infino.Basic.GridFunction(1, g)
     # initial data
     u = gfs.levs[1].u[1]
@@ -29,7 +29,7 @@ end
 end
 
 @testset "RK4 Method Tests" begin
-    g = Infino.Basic.Grid(2, [[-1.0, 1.0]], 0, 0, 0.25)
+    g = Infino.Basic.Grid(2, [[-1.0, 1.0]], 0, 0; cfl = 0.25, verbose = false)
     gfs = Infino.Basic.GridFunction(1, g)
     # initial data
     u = gfs.levs[1].u[1]

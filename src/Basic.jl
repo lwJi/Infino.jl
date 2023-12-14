@@ -60,7 +60,15 @@ mutable struct Grid
     dt::Float64
     time::Float64
 
-    function Grid(nx1, xboxs::Vector{Vector{Float64}}, ngh, nbuf, cfl = 0.4, t = 0.0)
+    function Grid(
+        nx1,
+        xboxs::Vector{Vector{Float64}},
+        ngh,
+        nbuf;
+        cfl = 0.4,
+        t = 0.0,
+        verbose = true,
+    )
         dx1 = (xboxs[1][2] - xboxs[1][1]) / (nx1 - 1)
         dt1 = cfl * dx1
         lev1 = Level(nx1, ngh, nbuf, xboxs[1], dt1, t, [], [])
@@ -82,28 +90,33 @@ mutable struct Grid
             aligned = mod.(((imin-nbuf:imax+nbuf) .+ 1), 2) .== 0
             push!(levs, Level(nx, ngh, nbuf, xbox, cfl * dx, t, if2c, aligned))
         end
-        println("Grid Structure:")
-        for i = 1:length(levs)
-            println("lev[", i, "],")
-            println("  nx   = ", levs[i].nx)
-            println("  ngh  = ", levs[i].ngh)
-            println("  nbuf = ", levs[i].nbuf)
-            if (length(levs[i].if2c) == levs[i].nxa)
-                println(
-                    "  ibox = ",
-                    [levs[i].if2c[1+levs[i].nbuf], levs[i].if2c[levs[i].nxa-levs[i].nbuf]],
-                    ", ",
-                    [
-                        levs[i].aligned[1+levs[i].nbuf],
-                        levs[i].aligned[levs[i].nxa-levs[i].nbuf],
-                    ],
-                )
+        if verbose
+            println("Grid Structure:")
+            for i = 1:length(levs)
+                println("lev[", i, "],")
+                println("  nx   = ", levs[i].nx)
+                println("  ngh  = ", levs[i].ngh)
+                println("  nbuf = ", levs[i].nbuf)
+                if length(levs[i].if2c) == levs[i].nxa
+                    println(
+                        "  ibox = ",
+                        [
+                            levs[i].if2c[1+levs[i].nbuf],
+                            levs[i].if2c[levs[i].nxa-levs[i].nbuf],
+                        ],
+                        ", ",
+                        [
+                            levs[i].aligned[1+levs[i].nbuf],
+                            levs[i].aligned[levs[i].nxa-levs[i].nbuf],
+                        ],
+                    )
+                end
+                println("  xbox = ", levs[i].xbox)
+                println("  dx   = ", levs[i].dx)
+                println("  dt   = ", levs[i].dt)
+                # println("  if2c = ", levs[i].if2c)
+                # println("  aligned= ", levs[i].aligned)
             end
-            println("  xbox = ", levs[i].xbox)
-            println("  dx   = ", levs[i].dx)
-            println("  dt   = ", levs[i].dt)
-            # println("  if2c = ", levs[i].if2c)
-            # println("  aligned= ", levs[i].aligned)
         end
         new(levs, dt1, t)
     end

@@ -6,7 +6,7 @@ using Infino
     ngh = 2
     nbuf = ngh * 4
     bnds = [[-4.0, 4.0], [0.6, 1.4], [0.8, 1.2]]
-    g = Infino.Basic.Grid(nx, bnds, ngh, nbuf)
+    g = Infino.Basic.Grid(nx, bnds, ngh, nbuf; verbose = false)
     @test abs(g.levs[1].dx - 0.08) + abs(g.levs[2].dx - 0.04) + abs(g.levs[3].dx - 0.02) <
           tol
 
