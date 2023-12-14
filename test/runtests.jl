@@ -12,4 +12,7 @@ using SafeTestsets
     @safetestset "ODESolver" begin
         include("unit/odesolver.jl")
     end
+    @safetestset "ScalarWave" begin
+        include("unit/scalarwave.jl")
+    end
 end
