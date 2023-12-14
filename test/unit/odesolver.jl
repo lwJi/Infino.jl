@@ -23,9 +23,7 @@ end
         Infino.ODESolver.euler!(example_ode!, gfs.levs[1])
     end
     t = g.levs[1].time
-    error = (gfs.levs[1].u[1][1] - analytical_solution(t)) / analytical_solution(t)
-    # println(error)
-    @test isapprox(error, 0; atol = 1e-4)
+    @test isapprox(gfs.levs[1].u[1][1], analytical_solution(t); rtol = 1e-4)
 end
 
 @testset "RK4 Method Tests" begin
@@ -40,7 +38,5 @@ end
         Infino.ODESolver.rk4!(example_ode!, gfs.levs[1])
     end
     t = g.levs[1].time
-    error = (gfs.levs[1].u[1][1] - analytical_solution(t)) / analytical_solution(t)
-    # println(error)
-    @test isapprox(error, 0; atol = 1e-4)
+    @test isapprox(gfs.levs[1].u[1][1], analytical_solution(t); rtol = 1e-4)
 end
