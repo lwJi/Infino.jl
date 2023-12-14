@@ -1,23 +1,53 @@
 using Infino
 
-@testset "Derivs" begin
-    tol = 1e-8
+@testset "2nd-Order Accurate 1st-Derivative" begin
+    ord = 2
+    ngh = Int(ord / 2)
     nx = 11
     x = LinRange(-0.5, 0.5, nx)
     dx = x[2] - x[1]
-    y1 = zeros(Float64, nx)
-    y2 = zeros(Float64, nx)
-    dy1 = zeros(Float64, nx)
-    ddy2 = zeros(Float64, nx)
-    @. y1 = 2.0 * x
-    @. y2 = x * x
-    Infino.Derivs.derivs_1st!(dy1, y1, dx, 2)
-    @test all(dy1[3:nx-2] .- 2.0 .< tol)
-    Infino.Derivs.derivs_1st!(dy1, y1, dx, 4)
-    @test all(dy1[3:nx-2] .- 2.0 .< tol)
-    Infino.Derivs.derivs_2nd!(ddy2, y2, dx, 2)
-    @test all(ddy2[3:nx-2] .- 2.0 .< tol)
-    Infino.Derivs.derivs_2nd!(ddy2, y2, dx, 4)
-    @test all(ddy2[3:nx-2] .- 2.0 .< tol)
+    y = zeros(Float64, nx)
+    dy = zeros(Float64, nx)
+    @. y = 2.0 * x
+    Infino.Derivs.derivs_1st!(dy, y, dx, ord)
+    @test isapprox(dy[1+ngh:nx-ngh], ones(Float64, nx - 2 * ngh) * 2.0; rtol = 1e-12)
+end
 
+@testset "4th-Order Accurate 1st-Derivative" begin
+    ord = 4
+    ngh = Int(ord / 2)
+    nx = 11
+    x = LinRange(-0.5, 0.5, nx)
+    dx = x[2] - x[1]
+    y = zeros(Float64, nx)
+    dy = zeros(Float64, nx)
+    @. y = 2.0 * x
+    Infino.Derivs.derivs_1st!(dy, y, dx, ord)
+    @test isapprox(dy[1+ngh:nx-ngh], ones(Float64, nx - 2 * ngh) * 2.0; rtol = 1e-12)
+end
+
+@testset "2nd-Order Accurate 2nd-Derivative" begin
+    ord = 2
+    ngh = Int(ord / 2)
+    nx = 11
+    x = LinRange(-0.5, 0.5, nx)
+    dx = x[2] - x[1]
+    y = zeros(Float64, nx)
+    ddy = zeros(Float64, nx)
+    @. y = x * x
+    Infino.Derivs.derivs_2nd!(ddy, y, dx, ord)
+    @test isapprox(ddy[1+ngh:nx-ngh], ones(Float64, nx - 2 * ngh) * 2.0; rtol = 1e-12)
+end
+
+@testset "4th-Order Accurate 2nd-Derivative" begin
+    ord = 4
+    ngh = Int(ord / 2)
+    nx = 11
+    x = LinRange(-0.5, 0.5, nx)
+    dx = x[2] - x[1]
+    y = zeros(Float64, nx)
+    ddy = zeros(Float64, nx)
+    @. y = x * x
+    Infino.Derivs.derivs_2nd!(ddy, y, dx, ord)
+    @test isapprox(ddy[1+ngh:nx-ngh], ones(Float64, nx - 2 * ngh) * 2.0; rtol = 1e-12)
 end
