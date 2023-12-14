@@ -5,5 +5,4 @@ nx        = 101
 ngh       = 2
 itlast    = 40
 out_every = 10
-ggif = true
 # out_dir = "data"

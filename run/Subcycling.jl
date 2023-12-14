@@ -60,6 +60,7 @@ function main()
     ###############
     println("Setting up initial conditions...")
     Infino.Physical.InitialData!(gfs)
+    Infino.Boundary.ApplyPeriodicBoundaryCondition!(gfs)
 
     @printf(
         "Simulation time: %.4f, iteration %d. E = %.4f\n",
