@@ -3,6 +3,9 @@ using Test
 using SafeTestsets
 
 @time begin
+    @safetestset "Algo" begin
+        include("unit/algo.jl")
+    end
     @safetestset "Basic" begin
         include("unit/basic.jl")
     end

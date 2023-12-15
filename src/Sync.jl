@@ -1,5 +1,7 @@
 module Sync
 
+include("Algo.jl")
+
 function Prolongation(gfs, l, interp_in_time::Bool)
     nxa = gfs.grid.levs[l].nxa
     nbuf = gfs.grid.levs[l].nbuf
@@ -30,11 +32,11 @@ function Prolongation(gfs, l, interp_in_time::Bool)
             # here we assume that we always march coarse level first: l in 1:lmax
             for f = 1:nbuf
                 c = if2c[f]
-                uf[f] = ((aligned[f]) ? uc_p[c] : (uc_p[c] + uc_p[c+1]) * 0.5)
+                uf[f] = ((aligned[f]) ? uc_p[c] : Algo.Interpolation(uc_p, c, 2))
             end
             for f = nxa:-1:nxa-nbuf+1
                 c = if2c[f]
-                uf[f] = ((aligned[f]) ? uc_p[c] : (uc_p[c] + uc_p[c+1]) * 0.5)
+                uf[f] = ((aligned[f]) ? uc_p[c] : Algo.Interpolation(uc_p, c, 2))
             end
         end
     end
