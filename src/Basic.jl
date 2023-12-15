@@ -31,6 +31,7 @@ struct LevelFunction
     x::Array{Float64,1}
     u::Array{Array{Float64,1},1}
     u_p::Array{Array{Float64,1},1}
+    u_pp::Array{Array{Float64,1},1}
     rhs::Array{Array{Float64,1},1}
     w::Array{Array{Float64,1},1}
 
@@ -41,15 +42,17 @@ struct LevelFunction
         x = LinRange(xmin, xmax, lev.nxa)
         u = Array{Array{Float64,1},1}(undef, nd)
         u_p = Array{Array{Float64,1},1}(undef, nd)
+        u_pp = Array{Array{Float64,1},1}(undef, nd)
         rhs = Array{Array{Float64,1},1}(undef, nd)
         w = Array{Array{Float64,1},1}(undef, nd)
         for i = 1:nd
             u[i] = zeros(Float64, lev.nxa)
             u_p[i] = zeros(Float64, lev.nxa)
+            u_pp[i] = zeros(Float64, lev.nxa)
             rhs[i] = zeros(Float64, lev.nxa)
             w[i] = zeros(Float64, lev.nxa)
         end
-        new(nd, lev, x, u, u_p, rhs, w)
+        new(nd, lev, x, u, u_p, u_pp, rhs, w)
     end
 
 end
