@@ -60,10 +60,12 @@ function euler!(f::Function, levfs)
     lev = levfs.lev
     u = levfs.u
     u_p = levfs.u_p
+    u_pp = levfs.u_pp
     r = levfs.rhs
     t = lev.time
     dt = lev.dt
 
+    @. u_pp = u_p
     @. u_p = u
     lev.time = t
     f(lev, r, u)
@@ -75,11 +77,13 @@ function rk4!(f::Function, levfs)
     lev = levfs.lev
     u = levfs.u
     u_p = levfs.u_p
+    u_pp = levfs.u_pp
     r = levfs.rhs
     w = levfs.w
     t = lev.time
     dt = lev.dt
 
+    @. u_pp = u_p
     @. u_p = u
     lev.time = t
     f(lev, r, u)
