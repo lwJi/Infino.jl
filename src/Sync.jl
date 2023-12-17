@@ -2,7 +2,7 @@ module Sync
 
 include("Algo.jl")
 
-function Prolongation(gfs, l, interp_in_time::Bool)
+function Prolongation(gfs, l, interp_in_time::Bool; ord_s = 1, ord_t = 1)
     nxa = gfs.grid.levs[l].nxa
     nbuf = gfs.grid.levs[l].nbuf
     if2c = gfs.grid.levs[l].if2c
@@ -22,18 +22,18 @@ function Prolongation(gfs, l, interp_in_time::Bool)
                     ucs =
                         (aligned[f]) ? [uc_pp[c], uc_p[c], uc[c]] :
                         ucs = [
-                            Algo.Interpolation(uc_pp, c, 1),
-                            Algo.Interpolation(uc_p, c, 1),
-                            Algo.Interpolation(uc, c, 1),
+                            Algo.Interpolation(uc_pp, c, ord_s),
+                            Algo.Interpolation(uc_p, c, ord_s),
+                            Algo.Interpolation(uc, c, ord_s),
                         ]
-                    uf[f] = Algo.Interpolation(ucs, 2, 1)
+                    uf[f] = Algo.Interpolation(ucs, 2, ord_t)
                 end
             else
                 # here we assume that we always march coarse level first: l in 1:lmax
                 for i = 1:nbuf
                     f = (j == 1) ? i : nxa - i + 1
                     c = if2c[f]
-                    uf[f] = ((aligned[f]) ? uc_p[c] : Algo.Interpolation(uc_p, c, 1))
+                    uf[f] = ((aligned[f]) ? uc_p[c] : Algo.Interpolation(uc_p, c, ord_s))
                 end
             end
         end
