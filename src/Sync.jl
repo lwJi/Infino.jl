@@ -9,34 +9,32 @@ function Prolongation(gfs, l, interp_in_time::Bool)
     aligned = gfs.grid.levs[l].aligned
     levsfs = gfs.levs
 
-    for v = 1:gfs.nd
-        uf = levsfs[l].u[v]
-        uc_p = levsfs[l-1].u_p[v]
-        if (interp_in_time)
-            uc = levsfs[l-1].u[v]
-            for f = 1:nbuf
-                c = if2c[f]
-                uf[f] = (
-                    (aligned[f]) ? (uc[c] + uc_p[c]) * 0.5 :
-                    (uc[c] + uc[c+1] + uc_p[c] + uc_p[c+1]) * 0.25
-                )
-            end
-            for f = nxa:-1:nxa-nbuf+1
-                c = if2c[f]
-                uf[f] = (
-                    (aligned[f]) ? (uc[c] + uc_p[c]) * 0.5 :
-                    (uc[c] + uc[c+1] + uc_p[c] + uc_p[c+1]) * 0.25
-                )
-            end
-        else
-            # here we assume that we always march coarse level first: l in 1:lmax
-            for f = 1:nbuf
-                c = if2c[f]
-                uf[f] = ((aligned[f]) ? uc_p[c] : Algo.Interpolation(uc_p, c, 1))
-            end
-            for f = nxa:-1:nxa-nbuf+1
-                c = if2c[f]
-                uf[f] = ((aligned[f]) ? uc_p[c] : Algo.Interpolation(uc_p, c, 1))
+    for j = 1:2  # left or right
+        for v = 1:gfs.nd
+            uf = levsfs[l].u[v]
+            uc_p = levsfs[l-1].u_p[v]
+            if (interp_in_time)
+                uc = levsfs[l-1].u[v]
+                uc_pp = levsfs[l-1].u_pp[v]
+                for i = 1:nbuf
+                    f = (j == 1) ? i : nxa - i + 1
+                    c = if2c[f]
+                    ucs =
+                        (aligned[f]) ? [uc_pp[c], uc_p[c], uc[c]] :
+                        ucs = [
+                            Algo.Interpolation(uc_pp, c, 1),
+                            Algo.Interpolation(uc_p, c, 1),
+                            Algo.Interpolation(uc, c, 1),
+                        ]
+                    uf[f] = Algo.Interpolation(ucs, 2, 1)
+                end
+            else
+                # here we assume that we always march coarse level first: l in 1:lmax
+                for i = 1:nbuf
+                    f = (j == 1) ? i : nxa - i + 1
+                    c = if2c[f]
+                    uf[f] = ((aligned[f]) ? uc_p[c] : Algo.Interpolation(uc_p, c, 1))
+                end
             end
         end
     end
