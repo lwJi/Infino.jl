@@ -59,7 +59,7 @@ function main()
     # Intial Data #
     ###############
     println("Setting up initial conditions...")
-    Infino.Physical.InitialData!(gfs)
+    Infino.InitialData.Gaussian!(gfs)
     Infino.Boundary.ApplyPeriodicBoundaryCondition!(gfs)
 
     @printf(
