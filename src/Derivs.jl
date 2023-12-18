@@ -1,44 +1,46 @@
 module Derivs
 
-##################
-# for single var #
-##################
-function derivs_1st!(du, u, dx, ord)
-    nx = length(u)
-    istart = 1 + div(ord, 2)
-    iend = nx - div(ord, 2)
-
+####################
+# for single point #
+####################
+function deriv_1st(u, i, dx, ord)
     if (ord == 2)
-        for i = istart:iend
-            du[i] = (-u[i-1] + u[i+1]) / (2 * dx)
-        end
+        return (-u[i-1] + u[i+1]) / (2 * dx)
     elseif (ord == 4)
-        for i = istart:iend
-            du[i] = (u[i-2] - 8 * u[i-1] + 8 * u[i+1] - u[i+2]) / (12 * dx)
-        end
+        return (u[i-2] - 8 * u[i-1] + 8 * u[i+1] - u[i+2]) / (12 * dx)
     else
         println("Finite difference order not supported yet: ord = ", ord)
         exit()
     end
 end
 
-function derivs_2nd!(ddu, u, dx, ord)
-    nx = length(u)
-    istart = 1 + div(ord, 2)
-    iend = nx - div(ord, 2)
-
+function deriv_2nd(u, i, dx, ord)
     if (ord == 2)
-        for i = istart:iend
-            ddu[i] = (u[i-1] - 2 * u[i] + u[i+1]) / (dx * dx)
-        end
+        return (u[i-1] - 2 * u[i] + u[i+1]) / (dx * dx)
     elseif (ord == 4)
-        for i = istart:iend
-            ddu[i] =
-                (-u[i-2] + 16 * u[i-1] - 30 * u[i] + 16 * u[i+1] - u[i+2]) / (12 * dx * dx)
-        end
+        return (-u[i-2] + 16 * u[i-1] - 30 * u[i] + 16 * u[i+1] - u[i+2]) / (12 * dx * dx)
     else
         println("Finite difference order not supported yet: ord = ", ord)
         exit()
+    end
+end
+
+##################
+# for single var #
+##################
+function derivs_1st!(du, u, dx, ord)
+    istart = 1 + div(ord, 2)
+    iend = length(u) - div(ord, 2)
+    for i = istart:iend
+        du[i] = deriv_1st(u, i, dx, ord)
+    end
+end
+
+function derivs_2nd!(ddu, u, dx, ord)
+    istart = 1 + div(ord, 2)
+    iend = length(u) - div(ord, 2)
+    for i = istart:iend
+        ddu[i] = deriv_2nd(u, i, dx, ord)
     end
 end
 
