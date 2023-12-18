@@ -20,9 +20,6 @@ function Gaussian!(gfs)
     end
 
     # for consistence
-    for l = 2:lmax
-        Sync.Prolongation(gfs, l, false)
-    end
     for l = lmax-1:-1:1
         Sync.Restriction(gfs, l)
     end
