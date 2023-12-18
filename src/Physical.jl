@@ -3,16 +3,23 @@ module Physical
 include("Derivs.jl")
 
 function WaveRHS!(lev, r, u)
+    epsdiss = 0.32
+    deriv_ord = 4
+
     psi = u[1]
     Pi = u[2]
     psi_rhs = r[1]
     Pi_rhs = r[2]
     # derivatives
     ddpsi = zeros(Float64, lev.nxa)
-    Derivs.derivs_2nd!(ddpsi, psi, lev.dx, lev.ngh * 2)
+    psi_diss = zeros(Float64, lev.nxa)
+    Pi_diss = zeros(Float64, lev.nxa)
+    Derivs.derivs_2nd!(ddpsi, psi, lev.dx, deriv_ord)
+    Derivs.derivs_diss!(psi_diss, psi, lev.dx, deriv_ord)
+    Derivs.derivs_diss!(Pi_diss, Pi, lev.dx, deriv_ord)
 
-    @. psi_rhs = Pi
-    @. Pi_rhs = ddpsi
+    @. psi_rhs = Pi + epsdiss * psi_diss
+    @. Pi_rhs = ddpsi + epsdiss * Pi_diss
 end
 
 function Energy(gfs)
@@ -22,7 +29,7 @@ function Energy(gfs)
     psi = gfs.levs[1].u[1]
     Pi = gfs.levs[1].u[2]
     dpsi = zeros(Float64, nxa)
-    Derivs.derivs_1st!(dpsi, psi, dx, gfs.grid.levs[1].ngh * 2)
+    Derivs.derivs_1st!(dpsi, psi, dx, gfs.grid.levs[1].fdord)
 
     E::Float64 = 0.0
     for i = 1+nbuf:nxa-nbuf

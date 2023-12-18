@@ -9,7 +9,7 @@ function analytical_Pi(t, x)
 end
 
 @testset "Scalar Wave Evolution on Unit Grid" begin
-    g = Infino.Basic.Grid(100, [[-0.5, 0.5 - 0.01]], 2, 2; cfl = 0.25, verbose = false)
+    g = Infino.Basic.Grid(100, [[-0.5, 0.5 - 0.01]], 3, 3; cfl = 0.25, verbose = false)
     gfs = Infino.Basic.GridFunction(2, g)
     nxa = g.levs[1].nxa
     nbuf = g.levs[1].nbuf
@@ -42,8 +42,8 @@ end
     g = Infino.Basic.Grid(
         100,
         [[-0.5, 0.5 - 0.01], [-0.25, 0.25 - 0.005], [-0.125, 0.125 - 0.0025]],
-        2,
-        2;
+        3,
+        3;
         cfl = 0.25,
         verbose = false,
     )
@@ -75,7 +75,7 @@ end
         @test isapprox(
             gfs.levs[l].u[1][1+nbuf:nxa-nbuf],
             analytical_psi.(t, x)[1+nbuf:nxa-nbuf];
-            rtol = 1e-5,
+            rtol = 1e-6,
         )
         @test isapprox(
             gfs.levs[l].u[2][1+nbuf:nxa-nbuf],

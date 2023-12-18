@@ -8,6 +8,7 @@ mutable struct Level
     ngh::Int64  # num of ghost points
     nbuf::Int64  # num of buffer points
     nxa::Int64  # num of all grid points
+    fdord::Int64
     xbox::Array{Float64,1}  # size computational domain (interior)
     dx::Float64
     dt::Float64
@@ -16,10 +17,10 @@ mutable struct Level
     if2c::Array{Int64,1}  # map between indexes of current and its parent level
     aligned::Array{Bool,1}  # if grid aligned with coarse grid
 
-    function Level(nx, ngh, nbuf, xbox, dt, t, if2c, aligned)
+    function Level(nx, ngh, nbuf, fdord, xbox, dt, t, if2c, aligned)
         nxa = nx + 2 * nbuf
         dx = (xbox[2] - xbox[1]) / (nx - 1)
-        new(nx, ngh, nbuf, nxa, xbox, dx, dt, t, if2c, aligned)
+        new(nx, ngh, nbuf, nxa, fdord, xbox, dx, dt, t, if2c, aligned)
     end
 
 end
@@ -68,13 +69,14 @@ mutable struct Grid
         xboxs::Vector{Vector{Float64}},
         ngh,
         nbuf;
+        fdord = 4,
         cfl = 0.4,
         t = 0.0,
         verbose = true,
     )
         dx1 = (xboxs[1][2] - xboxs[1][1]) / (nx1 - 1)
         dt1 = cfl * dx1
-        lev1 = Level(nx1, ngh, nbuf, xboxs[1], dt1, t, [], [])
+        lev1 = Level(nx1, ngh, nbuf, fdord, xboxs[1], dt1, t, [], [])
         levs = Vector{Level}([lev1])
         for i = 2:length(xboxs)
             dx = dx1 / 2^(i - 1)
@@ -91,18 +93,19 @@ mutable struct Grid
             nx = (imax - imin) + 1  #  (floor(Int, (xl[imax] - xl[imin]) / dx)) + 1
             if2c = div.(((imin-nbuf:imax+nbuf) .+ 1), 2) .+ nbuf
             aligned = mod.(((imin-nbuf:imax+nbuf) .+ 1), 2) .== 0
-            push!(levs, Level(nx, ngh, nbuf, xbox, cfl * dx, t, if2c, aligned))
+            push!(levs, Level(nx, ngh, nbuf, fdord, xbox, cfl * dx, t, if2c, aligned))
         end
         if verbose
             println("Grid Structure:")
             for i = 1:length(levs)
                 println("lev[", i, "],")
-                println("  nx   = ", levs[i].nx)
-                println("  ngh  = ", levs[i].ngh)
-                println("  nbuf = ", levs[i].nbuf)
+                println("  nx    = ", levs[i].nx)
+                println("  ngh   = ", levs[i].ngh)
+                println("  nbuf  = ", levs[i].nbuf)
+                println("  fdord = ", levs[i].fdord)
                 if length(levs[i].if2c) == levs[i].nxa
                     println(
-                        "  ibox = ",
+                        "  ibox  = ",
                         [
                             levs[i].if2c[1+levs[i].nbuf],
                             levs[i].if2c[levs[i].nxa-levs[i].nbuf],
@@ -114,9 +117,9 @@ mutable struct Grid
                         ],
                     )
                 end
-                println("  xbox = ", levs[i].xbox)
-                println("  dx   = ", levs[i].dx)
-                println("  dt   = ", levs[i].dt)
+                println("  xbox  = ", levs[i].xbox)
+                println("  dx    = ", levs[i].dx)
+                println("  dt    = ", levs[i].dt)
                 # println("  if2c = ", levs[i].if2c)
                 # println("  aligned= ", levs[i].aligned)
             end
