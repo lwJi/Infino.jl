@@ -2,7 +2,7 @@ module Sync
 
 include("Algo.jl")
 
-function Prolongation(gfs, l, interp_in_time::Bool; ord_s = 1, ord_t = 1)
+function Prolongation(gfs, l, interp_in_time::Bool; ord_s = 3, ord_t = 2)
     nxa = gfs.grid.levs[l].nxa
     nbuf = gfs.grid.levs[l].nbuf
     if2c = gfs.grid.levs[l].if2c
