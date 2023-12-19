@@ -19,25 +19,27 @@ function Evolve!(f::Function, gfs)
     #-------------------------#
     # march the rest substeps #
     #-------------------------#
-    substeps = ones(Int64, lmax)
-    dt_min = gfs.grid.levs[lmax].dt
-    for s = 2:2^(lmax-1)
-        # march levels except coarest and finest ones
-        for l = 2:lmax-1
-            if (
-                (abs(gfs.grid.levs[l+1].time - gfs.grid.levs[l].time) < tiny) &&
-                (abs(gfs.grid.levs[1].time - gfs.grid.levs[l].time) > dt_min)
-            )
-                substeps[l] += 1
-                Sync.Restriction(gfs, l)
-                Sync.Prolongation(gfs, l, mod(substeps[l], 2) == 0)
-                rk4!(f, gfs.levs[l])
+    if gfs.grid.subcycling
+        substeps = ones(Int64, lmax)
+        dt_min = gfs.grid.levs[lmax].dt
+        for s = 2:2^(lmax-1)
+            # march levels except coarest and finest ones
+            for l = 2:lmax-1
+                if (
+                    (abs(gfs.grid.levs[l+1].time - gfs.grid.levs[l].time) < tiny) &&
+                    (abs(gfs.grid.levs[1].time - gfs.grid.levs[l].time) > dt_min)
+                )
+                    substeps[l] += 1
+                    Sync.Restriction(gfs, l)
+                    Sync.Prolongation(gfs, l, mod(substeps[l], 2) == 0)
+                    rk4!(f, gfs.levs[l])
+                end
             end
+            # march the finest level
+            substeps[lmax] += 1
+            Sync.Prolongation(gfs, lmax, mod(s, 2) == 0)
+            rk4!(f, gfs.levs[lmax])
         end
-        # march the finest level
-        substeps[lmax] += 1
-        Sync.Prolongation(gfs, lmax, mod(s, 2) == 0)
-        rk4!(f, gfs.levs[lmax])
     end
 
     #------------------------#

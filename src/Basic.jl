@@ -63,6 +63,7 @@ mutable struct Grid
     levs::Vector{Level}
     dt::Float64
     time::Float64
+    subcycling::Bool
 
     function Grid(
         nx1,
@@ -72,14 +73,16 @@ mutable struct Grid
         fdord = 4,
         cfl = 0.4,
         t = 0.0,
+        subcycling = true,
         verbose = true,
     )
         dx1 = (xboxs[1][2] - xboxs[1][1]) / (nx1 - 1)
-        dt1 = cfl * dx1
+        dt1 = (subcycling ? cfl * dx1 : cfl * dx1 / 2^(length(xboxs) - 1))
         lev1 = Level(nx1, ngh, nbuf, fdord, xboxs[1], dt1, t, [], [])
         levs = Vector{Level}([lev1])
         for i = 2:length(xboxs)
             dx = dx1 / 2^(i - 1)
+            dt = (subcycling ? cfl * dx : dt1)
             levl = levs[i-1]
             xl = LinRange(levl.xbox[1], levl.xbox[2], (levl.nx - 1) * 2 + 1)
             imin = argmin(abs.(xl .- xboxs[i][1]))
@@ -93,7 +96,7 @@ mutable struct Grid
             nx = (imax - imin) + 1  #  (floor(Int, (xl[imax] - xl[imin]) / dx)) + 1
             if2c = div.(((imin-nbuf:imax+nbuf) .+ 1), 2) .+ nbuf
             aligned = mod.(((imin-nbuf:imax+nbuf) .+ 1), 2) .== 0
-            push!(levs, Level(nx, ngh, nbuf, fdord, xbox, cfl * dx, t, if2c, aligned))
+            push!(levs, Level(nx, ngh, nbuf, fdord, xbox, dt, t, if2c, aligned))
         end
         if verbose
             println("Grid Structure:")
@@ -124,7 +127,7 @@ mutable struct Grid
                 # println("  aligned= ", levs[i].aligned)
             end
         end
-        new(levs, dt1, t)
+        new(levs, dt1, t, subcycling)
     end
 
 end
