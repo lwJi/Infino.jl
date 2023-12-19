@@ -61,12 +61,12 @@ end
 Time Integration Methods:
     * euler!, rk4!
 ===============================================================================#
-function euler!(f::Function, levfs)
-    u = levfs.u
-    u_p = levfs.u_p
-    u_pp = levfs.u_pp
-    r = levfs.rhs
-    lev = levfs.lev
+function euler!(f::Function, levf)
+    u = levf.u
+    u_p = levf.u_p
+    u_pp = levf.u_pp
+    r = levf.rhs
+    lev = levf.lev
     t = lev.time
     dt = lev.dt
 
@@ -78,13 +78,13 @@ function euler!(f::Function, levfs)
     lev.time = t + dt
 end
 
-function rk4!(f::Function, levfs)
-    u = levfs.u
-    u_p = levfs.u_p
-    u_pp = levfs.u_pp
-    r = levfs.rhs
-    w = levfs.w
-    lev = levfs.lev
+function rk4!(f::Function, levf)
+    u = levf.u
+    u_p = levf.u_p
+    u_pp = levf.u_pp
+    r = levf.rhs
+    w = levf.w
+    lev = levf.lev
     t = lev.time
     dt = lev.dt
 
