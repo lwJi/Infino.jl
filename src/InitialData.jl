@@ -5,27 +5,29 @@ include("Sync.jl")
 include("ODESolver.jl")
 include("Physical.jl")
 
-function Gaussian!(gfs)
+#===============================================================================
+Initial Data Types:
+    * Gaussian
+===============================================================================#
+function Gaussian!(gfs; amp = 1.0, sig = 0.2, x0 = 0.0)
     lmax = length(gfs.levs)
-    amp = 1.0
-    sig = 0.2
-    x0 = 0.0
-
     for l = 1:lmax
         psi = gfs.levs[l].u[1]
         Pi = gfs.levs[l].u[2]
         x = gfs.levs[l].x
-
         @. psi = amp * exp(-((x - x0) / sig)^2)
         @. Pi = 0.0
     end
-
-    # for consistence
+    # restriction for consistence
     for l = lmax-1:-1:1
         Sync.Restriction(gfs, l)
     end
 end
 
+#===============================================================================
+Spectial Treatment for Prolongation
+    * evolve backwards to file u_p
+===============================================================================#
 function NegativeWaveRHS!(lev, r, u)
     Physical.WaveRHS!(lev, r, u)
     @. r = -r
@@ -33,21 +35,18 @@ end
 
 function MarchBackwards!(gfs)
     for l = 1:length(gfs.levs)
-        levf = gfs.levs[l]
-
         if l > 1
             Sync.Prolongation(gfs, l, false)
         end
-        ODESolver.rk4!(NegativeWaveRHS!, levf)
-
-        u = levf.u
-        u_p = levf.u_p
-        u_pp = levf.u_pp
+        ODESolver.rk4!(NegativeWaveRHS!, gfs.levs[l])
+        # save new u(-dt) -> u_p, u(0) -> u
+        u = gfs.levs[l].u
+        u_p = gfs.levs[l].u_p
+        u_pp = gfs.levs[l].u_pp
         @. u_pp = u_p
         @. u_p = u
         @. u = u_pp
-
-        levf.lev.time = 0.0
+        gfs.levs[l].lev.time = 0.0
     end
     gfs.grid.time = 0.0
 end
