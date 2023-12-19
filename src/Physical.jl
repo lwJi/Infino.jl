@@ -2,32 +2,41 @@ module Physical
 
 include("Derivs.jl")
 
+#===============================================================================
+WaveRHS!:
+    * rhs of wave equation
+        dot(psi) = Pi
+        dot(Pi)  = ddpsi
+===============================================================================#
 function WaveRHS!(lev, r, u)
-    epsdiss = 0.32
-    deriv_ord = 4
-
     psi = u[1]
     Pi = u[2]
     psi_rhs = r[1]
     Pi_rhs = r[2]
-    # derivatives
+
     ddpsi = zeros(Float64, lev.nxa)
     psi_diss = zeros(Float64, lev.nxa)
     Pi_diss = zeros(Float64, lev.nxa)
-    Derivs.derivs_2nd!(ddpsi, psi, lev.dx, deriv_ord)
-    Derivs.derivs_diss!(psi_diss, psi, lev.dx, deriv_ord)
-    Derivs.derivs_diss!(Pi_diss, Pi, lev.dx, deriv_ord)
+    Derivs.derivs_2nd!(ddpsi, psi, lev.dx, lev.fdord)
+    Derivs.derivs_diss!(psi_diss, psi, lev.dx, lev.fdord)
+    Derivs.derivs_diss!(Pi_diss, Pi, lev.dx, lev.fdord)
 
-    @. psi_rhs = Pi + epsdiss * psi_diss
-    @. Pi_rhs = ddpsi + epsdiss * Pi_diss
+    @. psi_rhs = Pi + lev.diss * psi_diss
+    @. Pi_rhs = ddpsi + lev.diss * Pi_diss
 end
 
+#===============================================================================
+Energy:
+    * int_xmin^xmax (Pi^2/2 + dpsi^2/2)
+    * calculate on base level (interior) only
+===============================================================================#
 function Energy(gfs)
     nxa = gfs.grid.levs[1].nxa
     nbuf = gfs.grid.levs[1].nbuf
     dx = gfs.grid.levs[1].dx
     psi = gfs.levs[1].u[1]
     Pi = gfs.levs[1].u[2]
+
     dpsi = zeros(Float64, nxa)
     Derivs.derivs_1st!(dpsi, psi, dx, gfs.grid.levs[1].fdord)
 

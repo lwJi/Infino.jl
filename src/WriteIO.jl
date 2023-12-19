@@ -30,6 +30,7 @@ function dump(dir_path, gfs, it)
         end
     else
         println("Error: directory '$dir_path' does not exist!")
+        exit()
     end
 end
 
