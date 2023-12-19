@@ -8,7 +8,7 @@ mutable struct Level
     ngh::Int64  # num of ghost points
     nbuf::Int64  # num of buffer points
     nxa::Int64  # num of all grid points
-    fdord::Int64
+    fdord::Int64  # finite difference order
     xbox::Array{Float64,1}  # size computational domain (interior)
     dx::Float64
     dt::Float64
@@ -27,17 +27,17 @@ end
 
 struct LevelFunction
 
-    nd::Int64
-    lev::Level
-    x::Array{Float64,1}
-    u::Array{Array{Float64,1},1}
-    u_p::Array{Array{Float64,1},1}
-    u_pp::Array{Array{Float64,1},1}
-    rhs::Array{Array{Float64,1},1}
-    w::Array{Array{Float64,1},1}
+    nd::Int64  # num of evolution variables
+    lev::Level  # level structure
+    x::Array{Float64,1}  # coordinates
+    u::Array{Array{Float64,1},1}  # state vectors
+    u_p::Array{Array{Float64,1},1}  # previous state vectors
+    u_pp::Array{Array{Float64,1},1}  # previous previous state vectors
+    rhs::Array{Array{Float64,1},1}  # rhs of state vectors
+    w::Array{Array{Float64,1},1}  # intermediate state vectors
 
     function LevelFunction(nd, lev)
-        noffset = (lev.nxa - lev.nx) / 2
+        noffset = (lev.nxa - lev.nx) / 2  # take account of buffer zone
         xmin = lev.xbox[1] - noffset * lev.dx
         xmax = lev.xbox[2] + noffset * lev.dx
         x = LinRange(xmin, xmax, lev.nxa)
@@ -63,10 +63,10 @@ mutable struct Grid
     levs::Vector{Level}
     dt::Float64
     time::Float64
-    subcycling::Bool
+    subcycling::Bool  # turn on subcycling or not
 
     function Grid(
-        nx1,
+        nx1,  # num of interior grid points at base level
         xboxs::Vector{Vector{Float64}},
         ngh,
         nbuf;
@@ -76,29 +76,32 @@ mutable struct Grid
         subcycling = true,
         verbose = true,
     )
+        # build the first level (base level)
         dx1 = (xboxs[1][2] - xboxs[1][1]) / (nx1 - 1)
-        dt1 = (subcycling ? cfl * dx1 : cfl * dx1 / 2^(length(xboxs) - 1))
+        dt1 = subcycling ? cfl * dx1 : cfl * dx1 / 2^(length(xboxs) - 1)
         lev1 = Level(nx1, ngh, nbuf, fdord, xboxs[1], dt1, t, [], [])
         levs = Vector{Level}([lev1])
+        # build the rest levels
         for i = 2:length(xboxs)
             dx = dx1 / 2^(i - 1)
             dt = (subcycling ? cfl * dx : dt1)
-            levl = levs[i-1]
+            levl = levs[i-1]  # level lower than the current level (parent level)
+            # if we refine parent level everywhere
             xl = LinRange(levl.xbox[1], levl.xbox[2], (levl.nx - 1) * 2 + 1)
+            # find those two which are closest to current level boundaries
             imin = argmin(abs.(xl .- xboxs[i][1]))
             imax = argmin(abs.(xl .- xboxs[i][2]))
-            # ncell = floor(Int, (xboxs[i][2] - xmin) / dx)
-            # xbox = [xmin, xmin + ncell * dx]
-            # xl = LinRange(levl.xbox[1], levl.xbox[2], levl.nx)
-            # imin = findall(x->abs(x - xboxs[i][1]) <= dx + 1e-12, xl)[1]
-            # imax = findall(x->abs(x - xboxs[i][2]) <= dx + 1e-12, xl)[end]
+            #imin = findall(x->abs(x - xboxs[i][1]) <= dx + 1e-12, xl)[1]
+            #imax = findall(x->abs(x - xboxs[i][2]) <= dx + 1e-12, xl)[end]
             xbox = [xl[imin], xl[imax]]
-            nx = (imax - imin) + 1  #  (floor(Int, (xl[imax] - xl[imin]) / dx)) + 1
+            nx = (imax - imin) + 1  # (floor(Int, (xl[imax] - xl[imin]) / dx)) + 1
+            # maps between two levels
             if2c = div.(((imin-nbuf:imax+nbuf) .+ 1), 2) .+ nbuf
             aligned = mod.(((imin-nbuf:imax+nbuf) .+ 1), 2) .== 0
+            # build level
             push!(levs, Level(nx, ngh, nbuf, fdord, xbox, dt, t, if2c, aligned))
         end
-        if verbose
+        if verbose  # print
             println("Grid Structure:")
             for i = 1:length(levs)
                 println("lev[", i, "],")
@@ -123,10 +126,9 @@ mutable struct Grid
                 println("  xbox  = ", levs[i].xbox)
                 println("  dx    = ", levs[i].dx)
                 println("  dt    = ", levs[i].dt)
-                # println("  if2c = ", levs[i].if2c)
-                # println("  aligned= ", levs[i].aligned)
             end
         end
+        # construct
         new(levs, dt1, t, subcycling)
     end
 
