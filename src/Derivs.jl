@@ -1,8 +1,9 @@
 module Derivs
 
-####################
-# for single point #
-####################
+#===============================================================================
+Derivatives:
+    * single point
+===============================================================================#
 function deriv_1st(u, i, dx, ord)
     if ord == 2
         return (-u[i-1] + u[i+1]) / (2 * dx)
@@ -38,9 +39,10 @@ function deriv_diss(u, i, dx, diss_ord)
     end
 end
 
-##################
-# for single var #
-##################
+#===============================================================================
+Derivatives:
+    * single level
+===============================================================================#
 function derivs_1st!(du, u, dx, ord)
     istart = 1 + div(ord, 2)
     iend = length(u) - div(ord, 2)
@@ -67,9 +69,11 @@ function derivs_diss!(diss, u, dx, ord)
     end
 end
 
-###############
-# for varlist #
-###############
+#===============================================================================
+Derivatives:
+    * single level
+    * for varlist
+===============================================================================#
 function calc_du!(du::Array{Array{Float64,1},1}, u::Array{Array{Float64,1},1}, dx, ord)
     for i = 1:length(u)
         derivs_1st!(du[i], u[i], dx, ord)

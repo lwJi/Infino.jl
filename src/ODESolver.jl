@@ -29,8 +29,10 @@ function Evolve!(f::Function, gfs)
         substeps = ones(Int64, lmax)
         for s = 2:2^(lmax-1)  # from second to final substep (of the finest level)
             for l = 2:lmax  # march all levels except the coarest (from coarse to fine)
-                if l==lmax || ( abs(levs[l].time - levs[l+1].time) < tiny &&
-                                abs(levs[l].time - levs[1].time) > dt_min )
+                if l == lmax || (
+                    abs(levs[l].time - levs[l+1].time) < tiny &&
+                    abs(levs[l].time - levs[1].time) > dt_min
+                )
                     substeps[l] += 1
                     if l < lmax
                         Sync.Restriction(gfs, l)  # from l+1 to l
