@@ -78,11 +78,11 @@ end
     x = LinRange(-0.5, 0.5, nx)
     dx = x[2] - x[1]
     y = zeros(Float64, nx)
-    d4y = zeros(Float64, nx)
+    d6y = zeros(Float64, nx)
     @. y = x * x * x * x * x * x
-    Infino.Derivs.derivs_diss!(d4y, y, dx, ord)
+    Infino.Derivs.derivs_diss!(d6y, y, dx, ord)
     @test isapprox(
-        d4y[1+ngh:nx-ngh],
+        d6y[1+ngh:nx-ngh],
         ones(Float64, nx - 2 * ngh) / 2^diss_ord * dx^(diss_ord - 1) * 720;
         rtol = 1e-12,
     )

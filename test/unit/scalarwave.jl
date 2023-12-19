@@ -29,16 +29,16 @@ end
     @test isapprox(
         gfs.levs[1].u[1][1+nbuf:nxa-nbuf],
         analytical_psi.(t, x)[1+nbuf:nxa-nbuf];
-        rtol = 1e-6,
+        rtol = 1e-7,
     )
     @test isapprox(
         gfs.levs[1].u[2][1+nbuf:nxa-nbuf],
         analytical_Pi.(t, x)[1+nbuf:nxa-nbuf];
-        rtol = 1e-5,
+        rtol = 1e-6,
     )
 end
 
-@testset "Scalar Wave Evolution on 3 levels Grid without subcycling" begin
+@testset "Scalar Wave Evolution on 3 Levels Grid without Subcycling" begin
     g = Infino.Basic.Grid(
         100,
         [[-0.5, 0.5 - 0.01], [-0.25, 0.25 - 0.005], [-0.125, 0.125 - 0.0025]],
@@ -67,8 +67,8 @@ end
         Infino.ODESolver.Evolve!(Infino.Physical.WaveRHS!, gfs)
         Infino.Boundary.ApplyPeriodicBoundaryCondition!(gfs)
     end
+    t = g.time
     for l = 1:lmax
-        t = g.time
         nxa = g.levs[l].nxa
         nbuf = g.levs[l].nbuf
         x = gfs.levs[l].x
@@ -80,17 +80,17 @@ end
         @test isapprox(
             gfs.levs[l].u[2][1+nbuf:nxa-nbuf],
             analytical_Pi.(t, x)[1+nbuf:nxa-nbuf];
-            rtol = 1e-4,
+            rtol = 1e-5,
         )
     end
 end
 
-@testset "Scalar Wave Evolution on 3 levels Grid with subcycling" begin
+@testset "Scalar Wave Evolution on 3 Levels Grid with Subcycling" begin
     g = Infino.Basic.Grid(
         100,
         [[-0.5, 0.5 - 0.01], [-0.25, 0.25 - 0.005], [-0.125, 0.125 - 0.0025]],
         3,
-        3;
+        3 * 4;
         cfl = 0.25,
         verbose = false,
     )
@@ -107,6 +107,7 @@ end
     for l = lmax-1:-1:1
         Infino.Sync.Restriction(gfs, l)
     end
+    Infino.Boundary.ApplyPeriodicBoundaryCondition!(gfs)
     Infino.InitialData.MarchBackwards!(gfs)
     Infino.Boundary.ApplyPeriodicBoundaryCondition!(gfs)
     # evolution
@@ -114,20 +115,20 @@ end
         Infino.ODESolver.Evolve!(Infino.Physical.WaveRHS!, gfs)
         Infino.Boundary.ApplyPeriodicBoundaryCondition!(gfs)
     end
+    t = g.time
     for l = 1:lmax
-        t = g.time
         nxa = g.levs[l].nxa
         nbuf = g.levs[l].nbuf
         x = gfs.levs[l].x
         @test isapprox(
             gfs.levs[l].u[1][1+nbuf:nxa-nbuf],
             analytical_psi.(t, x)[1+nbuf:nxa-nbuf];
-            rtol = 1e-6,
+            rtol = 1e-7,
         )
         @test isapprox(
             gfs.levs[l].u[2][1+nbuf:nxa-nbuf],
             analytical_Pi.(t, x)[1+nbuf:nxa-nbuf];
-            rtol = 1e-4,
+            rtol = 1e-5,
         )
     end
 end
