@@ -20,20 +20,23 @@ function main(pars, out_dir)
     out_every = pars["parameters"]["out_every"]
     bbox = pars["parameters"]["bbox"]
     cfl = haskey(pars["parameters"], "cfl") ? pars["parameters"]["cfl"] : 0.25
+    subcycling =
+        haskey(pars["parameters"], "subcycling") ? pars["parameters"]["subcycling"] : true
     initial_data =
         haskey(pars["parameters"], "initial_data") ? pars["parameters"]["initial_data"] :
         "Gaussian"
     println("Parameters:")
-    println("  cfl       = ", cfl)
-    println("  itlast    = ", itlast)
-    println("  out_every = ", out_every)
-    println("  out_dir   = ", out_dir)
+    println("  cfl        = ", cfl)
+    println("  subcycling = ", subcycling)
+    println("  itlast     = ", itlast)
+    println("  out_every  = ", out_every)
+    println("  out_dir    = ", out_dir)
 
     ########################
     # build grid structure #
     ########################
     nbuf = ngh * 4
-    grid = Infino.Basic.Grid(nx, bbox, ngh, nbuf; cfl = cfl)
+    grid = Infino.Basic.Grid(nx, bbox, ngh, nbuf; cfl = cfl, subcycling = subcycling)
     gfs = Infino.Basic.GridFunction(2, grid)
 
     ###############
