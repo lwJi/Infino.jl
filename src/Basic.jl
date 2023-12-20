@@ -64,7 +64,7 @@ struct LevelFunction
                 k[j][i] = zeros(Float64, lev.nxa)
             end
         end
-        new(nd, lev, x, u, u_p, u_pp, rhs, w)
+        new(nd, lev, x, u, u_p, u_pp, rhs, w, k)
     end
 
 end

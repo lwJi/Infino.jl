@@ -40,3 +40,18 @@ end
     t = g.levs[1].time
     @test isapprox(gfs.levs[1].u[1][1], analytical_solution(t); rtol = 1e-4)
 end
+
+@testset "RK4 Method (for New Subcycling) Tests" begin
+    g = Infino.Basic.Grid(2, [[-1.0, 1.0]], 0, 0; cfl = 0.25, verbose = false)
+    gfs = Infino.Basic.GridFunction(1, g)
+    # initial data
+    u = gfs.levs[1].u[1]
+    x = gfs.levs[1].x
+    @. u = analytical_solution.(0)
+    # evolution
+    for i = 1:4
+        Infino.ODESolver.rk4_new!(example_ode!, gfs.levs[1])
+    end
+    t = g.levs[1].time
+    @test isapprox(gfs.levs[1].u[1][1], analytical_solution(t); rtol = 1e-4)
+end

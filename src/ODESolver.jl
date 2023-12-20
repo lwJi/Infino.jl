@@ -111,4 +111,38 @@ function rk4!(f::Function, levf)
     lev.time = t + dt
 end
 
+function rk4_new!(f::Function, levf)
+    u = levf.u
+    u_p = levf.u_p
+    w = levf.w
+    k1 = levf.k[1]
+    k2 = levf.k[2]
+    k3 = levf.k[3]
+    k4 = levf.k[4]
+    lev = levf.lev
+    t = lev.time
+    dt = lev.dt
+
+    @. u_p = u
+    lev.time = t
+    f(lev, k1, u)
+    @. u += k1 * (dt / 6)
+
+    @. w = u_p + k1 * (dt / 2)
+    lev.time = t + 0.5 * dt
+    f(lev, k2, w)
+    @. u += k2 * (dt / 3)
+
+    @. w = u_p + k2 * (dt / 2)
+    lev.time = t + 0.5 * dt
+    f(lev, k3, w)
+    @. u += k3 * (dt / 3)
+
+    @. w = u_p + k3 * dt
+    lev.time = t + dt
+    f(lev, k4, w)
+    @. u += k4 * (dt / 6)
+    lev.time = t + dt
+end
+
 end
