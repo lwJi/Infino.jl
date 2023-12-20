@@ -24,6 +24,21 @@ function Gaussian!(gfs; amp = 1.0, sig = 0.2, x0 = 0.0)
     end
 end
 
+function sinusoidal!(gfs)
+    lmax = length(gfs.levs)
+    for l = 1:lmax
+        psi = gfs.levs[l].u[1]
+        Pi = gfs.levs[l].u[2]
+        x = gfs.levs[l].x
+        @. psi = sin(2 * pi * (x - 0.0))
+        @. Pi = -2 * pi * cos(2 * pi * (x - 0.0))
+    end
+    # restriction for consistence
+    for l = lmax-1:-1:1
+        Sync.Restriction(gfs, l)
+    end
+end
+
 #===============================================================================
 Spectial Treatment for Prolongation
     * evolve backwards to file u_p

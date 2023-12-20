@@ -24,12 +24,12 @@ function main()
     ngh = pars["parameters"]["ngh"]
     itlast = pars["parameters"]["itlast"]
     out_every = pars["parameters"]["out_every"]
-    bbox = pars["parameters"]["bbox"]
-    if haskey(pars["parameters"], "out_dir")
-        out_dir_base = pars["parameters"]["out_dir"]
-    else
-        out_dir_base = splitext(basename(pars_path))[1]
-    end
+    initial_data =
+        haskey(pars["parameters"], "initial_data") ? pars["parameters"]["initial_data"] :
+        "Gaussian"
+    out_dir_base =
+        haskey(pars["parameters"], "out_dir") ? pars["parameters"]["out_dir"] :
+        splitext(basename(pars_path))[1]
     out_dir = joinpath(dirname(pars_path), out_dir_base)
     # print pars
     println("Parameters:")
@@ -53,7 +53,14 @@ function main()
     # Intial Data #
     ###############
     println("Setting up initial conditions...")
-    Infino.InitialData.Gaussian!(gfs)
+    if initial_data == "Gaussian"
+        Infino.InitialData.Gaussian!(gfs)
+    elseif initial_data == "sinusoidal"
+        Infino.InitialData.sinusoidal!(gfs)
+    else
+        println("Initial data type '$initial_data' unsupported yet")
+        exit()
+    end
     Infino.Boundary.ApplyPeriodicBoundaryCondition!(gfs)
     Infino.InitialData.MarchBackwards!(gfs)
     Infino.Boundary.ApplyPeriodicBoundaryCondition!(gfs)
