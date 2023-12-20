@@ -4,11 +4,21 @@ using TOML
 
 function main(pars, out_dir)
     println(
-        "================================================================================",
+        "--------------------------------------------------------------------------------",
     )
-    println("  Welcome to Subcycling Test")
+    println()
+    println(" =======")
+    println("         \\")
+    println("                         *******************")
+    println("          \\                Subcycling Test")
+    println("  -----       =======    *******************")
+    println("         \\ \\")
+    println("           --  ----- ")
+    println("         /")
+    println(" =======   -- =======")
+    println()
     println(
-        "================================================================================",
+        "--------------------------------------------------------------------------------",
     )
 
     ########################
@@ -87,7 +97,7 @@ function main(pars, out_dir)
     println(
         "--------------------------------------------------------------------------------",
     )
-    println("  Successfully Done.")
+    println("Successfully Done.")
 end
 
 function redirect_to_files(dofunc, outfile, errfile)
@@ -128,13 +138,20 @@ mkdir(out_dir)
 # copy parfile into out_dir
 cp(pars_path, out_dir * "/" * basename(pars_path))
 
-# redirect output and error
-redirect_to_files("./stdout.txt", "./stderr.txt") do
+# config
+redirect_std =
+    haskey(pars["configs"], "redirect_std") ? pars["configs"]["redirect_std"] : true
+
+if redirect_std
+    # redirect output and error
+    redirect_to_files("./stdout.txt", "./stderr.txt") do
+        main(pars, out_dir)
+    end
+    mv("./stdout.txt", out_dir * "/stdout.txt")
+    mv("./stderr.txt", out_dir * "/stderr.txt")
+else
     main(pars, out_dir)
 end
-
-mv("./stdout.txt", out_dir * "/stdout.txt")
-mv("./stderr.txt", out_dir * "/stderr.txt")
 #===============================================================================
 End Execution
 ===============================================================================#
