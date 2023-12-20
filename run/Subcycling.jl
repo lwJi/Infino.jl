@@ -2,16 +2,11 @@ using Infino
 using Printf
 using TOML
 
-function main()
+function main(pars, out_dir)
 
     println("===================================================================")
     println("  Welcome to Subcycling Test !!!  ")
     println("===================================================================")
-
-    if length(ARGS) < 1
-        println("Usage: julia Subcycling.jl parfile.toml")
-        exit(1)
-    end
 
     ########################
     # Read Parameter Files #
@@ -27,23 +22,12 @@ function main()
     initial_data =
         haskey(pars["parameters"], "initial_data") ? pars["parameters"]["initial_data"] :
         "Gaussian"
-    out_dir_base =
-        haskey(pars["parameters"], "out_dir") ? pars["parameters"]["out_dir"] :
-        splitext(basename(pars_path))[1]
-    out_dir = joinpath(dirname(pars_path), out_dir_base)
     # print pars
     println("Parameters:")
     println("  cfl       = ", cfl)
     println("  itlast    = ", itlast)
     println("  out_every = ", out_every)
     println("  out_dir   = ", out_dir)
-    # create output dir
-    if isdir(out_dir)
-        println("Removing old directory '$out_dir'...")
-        rm(out_dir, recursive = true)
-    end
-    println("Creating new directory '$out_dir'...")
-    mkdir(out_dir)
     # build grid structure
     nbuf = ngh * 4
     grid = Infino.Basic.Grid(nx, bbox, ngh, nbuf; cfl = cfl)
@@ -101,4 +85,52 @@ function main()
 
 end
 
-main()
+function redirect_to_files(dofunc, outfile, errfile)
+    open(outfile, "w") do out
+        open(errfile, "w") do err
+            redirect_stdout(out) do
+                redirect_stderr(err) do
+                    dofunc()
+                end
+            end
+        end
+    end
+end
+
+###################
+# Start Execution #
+###################
+
+if length(ARGS) < 1
+    println("Usage: julia Subcycling.jl parfile.toml")
+    exit(1)
+end
+pars_path = ARGS[1]
+pars = TOML.parsefile(pars_path)
+
+# create output directory
+out_dir_base =
+    haskey(pars["parameters"], "out_dir") ? pars["parameters"]["out_dir"] :
+    splitext(basename(pars_path))[1]
+out_dir = joinpath(dirname(pars_path), out_dir_base)
+if isdir(out_dir)
+    println("Removing old directory '$out_dir'...")
+    rm(out_dir, recursive = true)
+end
+println("Creating new directory '$out_dir'...")
+mkdir(out_dir)
+
+# copy parfile
+cp(pars_path, out_dir * "/" * basename(pars_path))
+
+# redirect output and error
+redirect_to_files("./stdout.txt", "./stderr.txt") do
+    main(pars, out_dir)
+end
+
+mv("./stdout.txt", out_dir * "/stdout.txt")
+mv("./stderr.txt", out_dir * "/stderr.txt")
+
+#######
+# End #
+#######
