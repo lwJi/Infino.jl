@@ -36,6 +36,8 @@ struct LevelFunction
     u_pp::Array{Array{Float64,1},1}  # previous previous state vectors
     rhs::Array{Array{Float64,1},1}  # rhs of state vectors
     w::Array{Array{Float64,1},1}  # intermediate state vectors
+    # intermediate state vectors for new subcycling
+    k::Array{Array{Array{Float64,1},1},1}
 
     function LevelFunction(nd, lev)
         noffset = (lev.nxa - lev.nx) / 2  # take account of buffer zone
@@ -47,12 +49,20 @@ struct LevelFunction
         u_pp = Array{Array{Float64,1},1}(undef, nd)
         rhs = Array{Array{Float64,1},1}(undef, nd)
         w = Array{Array{Float64,1},1}(undef, nd)
+        k = Array{Array{Array{Float64,1},1},1}(undef, 4)
+        for j = 1:4
+            k[j] = Array{Array{Float64,1},1}(undef, nd)
+        end
+
         for i = 1:nd
             u[i] = zeros(Float64, lev.nxa)
             u_p[i] = zeros(Float64, lev.nxa)
             u_pp[i] = zeros(Float64, lev.nxa)
             rhs[i] = zeros(Float64, lev.nxa)
             w[i] = zeros(Float64, lev.nxa)
+            for j = 1:4
+                k[j][i] = zeros(Float64, lev.nxa)
+            end
         end
         new(nd, lev, x, u, u_p, u_pp, rhs, w)
     end
