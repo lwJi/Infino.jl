@@ -25,11 +25,6 @@ function main()
     itlast = pars["parameters"]["itlast"]
     out_every = pars["parameters"]["out_every"]
     bbox = pars["parameters"]["bbox"]
-    if haskey(pars["parameters"], "ggif")
-        ggif = pars["parameters"]["ggif"]
-    else
-        ggif = false
-    end
     if haskey(pars["parameters"], "out_dir")
         out_dir_base = pars["parameters"]["out_dir"]
     else
@@ -41,7 +36,6 @@ function main()
     println("  cfl       = ", cfl)
     println("  itlast    = ", itlast)
     println("  out_every = ", out_every)
-    println("  ggif      = ", ggif)
     println("  out_dir   = ", out_dir)
     # create output dir
     if isdir(out_dir)
@@ -61,7 +55,8 @@ function main()
     println("Setting up initial conditions...")
     Infino.InitialData.Gaussian!(gfs)
     Infino.Boundary.ApplyPeriodicBoundaryCondition!(gfs)
-
+    Infino.InitialData.MarchBackwards!(gfs)
+    Infino.Boundary.ApplyPeriodicBoundaryCondition!(gfs)
     @printf(
         "Simulation time: %.4f, iteration %d. E = %.4f\n",
         gfs.grid.time,
