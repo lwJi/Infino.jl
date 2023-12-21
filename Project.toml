@@ -3,5 +3,8 @@ uuid = "fb86a6d0-8469-4260-849d-6419c6b51222"
 authors = ["Liwei Ji"]
 version = "1.0.0-DEV"
 
+[deps]
+Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
+
 [compat]
 julia = "1"
