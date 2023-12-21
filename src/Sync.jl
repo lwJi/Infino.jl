@@ -1,7 +1,6 @@
 module Sync
 
 include("Algo.jl")
-using Symbolics
 
 #===============================================================================
 Prolongation:
