@@ -28,9 +28,9 @@ function Prolongation_new(gfs, l, interp_in_time::Bool; ord_s = 3, ord_t = 2)
                     end
                 else
                     kfss = zeros(Float64, 3, 4)
-                    for k = 1:4
-                        kfss[:, k] = calc_kfs_from_kcs(
-                            [levc.k[m][v][c+k-2] for m = 1:4],
+                    for ic = 1:4
+                        kfss[:, ic] = calc_kfs_from_kcs(
+                            [levc.k[m][v][c+ic-2] for m = 1:4],
                             dtc,
                             interp_in_time,
                         )
@@ -83,14 +83,19 @@ function Prolongation(gfs, l, interp_in_time::Bool; ord_s = 3, ord_t = 2)
                 for i = 1:nbuf
                     f = (j == 1) ? i : nxa - i + 1
                     c = if2c[f]
-                    ucs =
-                        (aligned[f]) ? [uc_pp[c], uc_p[c], uc[c]] :
-                        [
-                            Algo.Interpolation(uc_pp, c, ord_s),
-                            Algo.Interpolation(uc_p, c, ord_s),
-                            Algo.Interpolation(uc, c, ord_s),
-                        ]
-                    uf[f] = Algo.Interpolation(ucs, 2, ord_t)
+                    if aligned[f]
+                        uf[f] = Algo.Interpolation([uc_pp[c], uc_p[c], uc[c]], 2, ord_t)
+                    else
+                        ucss = zeros(Float64, 3, 4)
+                        for ic = 1:4
+                            ucss[:, ic] = [uc_pp[c+ic-2], uc_p[c+ic-2], uc[c+ic-2]]
+                        end
+                        uf[f] = Algo.Interpolation(
+                            [Algo.Interpolation(ucss[m, :], 2, ord_s) for m = 1:3],
+                            2,
+                            ord_t,
+                        )
+                    end
                 end
             else
                 for i = 1:nbuf
