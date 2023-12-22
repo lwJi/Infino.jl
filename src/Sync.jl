@@ -1,6 +1,64 @@
 module Sync
 
 include("Algo.jl")
+include("Symb.jl")
+
+#===============================================================================
+Prolongation_new: use Mongwane's method
+    * from level l-1 to level l
+    * we assume that we always march coarse level first (for l in 2:lmax)
+===============================================================================#
+function Prolongation_new(gfs, l, interp_in_time::Bool; ord_s = 3, ord_t = 2)
+    levf = gfs.levs[l]
+    levc = gfs.levs[l-1]
+
+    for j = 1:2  # left or right
+        for v = 1:gfs.nd
+            for i = 1:nbuf
+                f = (j == 1) ? i : nxa - i + 1
+                c = if2c[f]
+                if aligned[f]
+                    kfs = calc_kfs_from_kcs(
+                        [levc.k[m][v][c] for m = 1:4],
+                        dtc,
+                        interp_in_time,
+                    )
+                    for m = 1:3
+                        levf.k[m][v][f] = kfs[m]
+                    end
+                else
+                    kfss = zeros(Float64, 3, 4)
+                    for k = 1:4
+                        kfss[:, k] = calc_kfs_from_kcs(
+                            [levc.k[m][v][c+k-2] for m = 1:4],
+                            dtc,
+                            interp_in_time,
+                        )
+                    end
+                    for m = 1:3
+                        levf.k[m][v][f] = Algo.Interpolation(kfss[m, :], 2, ord_s)
+                    end
+                end
+            end
+        end
+    end
+end
+
+function calc_kfs_from_kcs(kcs, dtc, interp_in_time::Bool)
+    t0_f = (interp_in_time) ? 0.5 : 0.0
+    thalf_f = (interp_in_time) ? 0.75 : 0.25
+    dtf = 0.5 * dtc
+    d1yc_t0 = Symb.dy(1)(t0_f, dtc, kcs)
+    d1yc = Symb.dy(1)(thalf_f, dtc, kcs)
+    d2yc = Symb.dy(2)(thalf_f, dtc, kcs)
+    d3yc = Symb.dy(3)(thalf_f, dtc, kcs)
+    fyd2yc = 4 * (kcs[3] - kcs[2]) / dtc^3
+    return [
+        dtf * d1yc_t0,
+        dtf * d1yc + 0.5 * dtf^2 * d2yc + 0.125 * dtf^3 * (d3yc - fyd2yc),
+        dtf * d1yc + 0.5 * dtf^2 * d2yc + 0.125 * dtf^3 * (d3yc + fyd2yc),
+    ]
+end
 
 #===============================================================================
 Prolongation:
