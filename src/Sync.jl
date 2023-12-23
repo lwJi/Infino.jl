@@ -9,6 +9,11 @@ Prolongation_new: use Mongwane's method
     * we assume that we always march coarse level first (for l in 2:lmax)
 ===============================================================================#
 function Prolongation_new(gfs, l, interp_in_time::Bool; ord_s = 3, ord_t = 2)
+    nxa = gfs.grid.levs[l].nxa
+    nbuf = gfs.grid.levs[l].nbuf
+    if2c = gfs.grid.levs[l].if2c
+    aligned = gfs.grid.levs[l].aligned
+    dtc = gfs.grid.levs[l-1].dt
     levf = gfs.levs[l]
     levc = gfs.levs[l-1]
 
