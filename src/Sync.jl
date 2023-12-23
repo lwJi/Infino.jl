@@ -14,30 +14,35 @@ function Prolongation_new(gfs, l, interp_in_time::Bool; ord_s = 3, ord_t = 2)
 
     for j = 1:2  # left or right
         for v = 1:gfs.nd
+            uf = levf.u[v]
+            uc_p = levc.u_p[v]
             for i = 1:nbuf
                 f = (j == 1) ? i : nxa - i + 1
                 c = if2c[f]
                 if aligned[f]
-                    kfs = calc_kfs_from_kcs(
-                        [levc.k[m][v][c] for m = 1:4],
-                        dtc,
-                        interp_in_time,
-                    )
+                    kcs = [levc.k[m][v][c] for m = 1:4]
+                    kfs = calc_kfs_from_kcs(kcs, dtc, interp_in_time)
+                    # setting k
                     for m = 1:3
                         levf.k[m][v][f] = kfs[m]
                     end
+                    # setting u
+                    uf[f] = interp_in_time ? Symb.y(0.5, uc_p[c], kcs) : uc_p[c]
                 else
                     kfss = zeros(Float64, 3, 4)
+                    ys = zeros(Float64, 4)
                     for ic = 1:4
-                        kfss[:, ic] = calc_kfs_from_kcs(
-                            [levc.k[m][v][c+ic-2] for m = 1:4],
-                            dtc,
-                            interp_in_time,
-                        )
+                        kcs = [levc.k[m][v][c+ic-2] for m = 1:4]
+                        kfss[:, ic] = calc_kfs_from_kcs(kcs, dtc, interp_in_time)
+                        ys[ic] =
+                            interp_in_time ? Symb.y(0.5, uc_p[c+ic-2], kcs) : uc_p[c+ic-2]
                     end
+                    # setting k
                     for m = 1:3
                         levf.k[m][v][f] = Algo.Interpolation(kfss[m, :], 2, ord_s)
                     end
+                    # setting u
+                    uf[f] = Algo.Interpolation(ys, 2, ord_s)
                 end
             end
         end
