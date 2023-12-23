@@ -1,8 +1,8 @@
 module Sync
 
 include("Algo.jl")
-include("Symb.jl")
 
+#=
 #===============================================================================
 Prolongation_new: use Mongwane's method
     * from level l-1 to level l
@@ -69,6 +69,7 @@ function calc_kfs_from_kcs(kcs, dtc, interp_in_time::Bool)
         dtf * d1yc + 0.5 * dtf^2 * d2yc + 0.125 * dtf^3 * (d3yc + fyd2yc),
     ]
 end
+=#
 
 #===============================================================================
 Prolongation:
