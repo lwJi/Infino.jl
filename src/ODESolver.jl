@@ -73,8 +73,8 @@ function euler!(f::Function, levf)
     t = lev.time
     dt = lev.dt
 
-    @. u_pp = u_p
-    @. u_p = u
+    @. u_pp = u_p * 1.0
+    @. u_p = u * 1.0
     lev.time = t
     f(lev, r, u)
     @. u += r * dt
@@ -91,8 +91,8 @@ function rk4!(f::Function, levf)
     t = lev.time
     dt = lev.dt
 
-    @. u_pp = u_p
-    @. u_p = u
+    @. u_pp = u_p * 1.0
+    @. u_p = u * 1.0
     lev.time = t
     f(lev, r, u)
     @. u += r * (dt / 6)
@@ -126,24 +126,24 @@ function rk4_new!(f::Function, levf)
     t = lev.time
     dt = lev.dt
 
-    @. u_p = u
+    @. u_p = u * 1.0
     lev.time = t
-    f(lev, k1, u)
+    f(lev, k1, u; interior_only = true)
     @. u += k1 * (dt / 6)
 
     @. w = u_p + k1 * (dt / 2)
     lev.time = t + 0.5 * dt
-    f(lev, k2, w)
+    f(lev, k2, w; interior_only = true)
     @. u += k2 * (dt / 3)
 
     @. w = u_p + k2 * (dt / 2)
     lev.time = t + 0.5 * dt
-    f(lev, k3, w)
+    f(lev, k3, w; interior_only = true)
     @. u += k3 * (dt / 3)
 
     @. w = u_p + k3 * dt
     lev.time = t + dt
-    f(lev, k4, w)
+    f(lev, k4, w; interior_only = true)
     @. u += k4 * (dt / 6)
     lev.time = t + dt
 end
