@@ -6,7 +6,7 @@ include("Sync.jl")
 Eovlve!:
     * evolve one complete time step for all levels
 ===============================================================================#
-function Evolve!(f::Function, gfs)
+function Evolve!(f::Function, gfs; Mongwane = false)
     lmax = length(gfs.levs)
 
     #----------------------------------------#
@@ -14,9 +14,10 @@ function Evolve!(f::Function, gfs)
     #----------------------------------------#
     for l = 1:lmax  # notice that we march coarse level first
         if l > 1
+            (Mongwane) ? Sync.Prolongation_new(gfs, l, false) :
             Sync.Prolongation(gfs, l, false)
         end
-        rk4!(f, gfs.levs[l])
+        (Mongwane) ? rk4_new!(f, gfs.levs[l]) : rk4!(f, gfs.levs[l])
     end
 
     #-------------------------------------------------#
@@ -37,8 +38,10 @@ function Evolve!(f::Function, gfs)
                     if l < lmax
                         Sync.Restriction(gfs, l)  # from l+1 to l
                     end
-                    Sync.Prolongation(gfs, l, mod(substeps[l], 2) == 0)  # from l-1 to l
-                    rk4!(f, gfs.levs[l])
+                    # from l-1 to l
+                    (Mongwane) ? Sync.Prolongation_new(gfs, l, mod(substeps[l], 2) == 0) :
+                    Sync.Prolongation(gfs, l, mod(substeps[l], 2) == 0)
+                    (Mongwane) ? rk4_new!(f, gfs.levs[l]) : rk4!(f, gfs.levs[l])
                 end
             end
         end
