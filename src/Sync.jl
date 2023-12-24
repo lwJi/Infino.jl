@@ -1,8 +1,8 @@
 module Sync
 
 include("Algo.jl")
+include("DenseOutput.jl")
 
-#=
 #===============================================================================
 Prolongation_new: use Mongwane's method
     * from level l-1 to level l
@@ -32,7 +32,7 @@ function Prolongation_new(gfs, l, interp_in_time::Bool; ord_s = 3, ord_t = 2)
                         levf.k[m][v][f] = kfs[m]
                     end
                     # setting u
-                    uf[f] = interp_in_time ? Symb.y(0.5, uc_p[c], kcs) : uc_p[c]
+                    uf[f] = interp_in_time ? DenseOutput.y(0.5, uc_p[c], kcs) : uc_p[c]
                 else
                     kfss = zeros(Float64, 3, 4)
                     ys = zeros(Float64, 4)
@@ -40,7 +40,8 @@ function Prolongation_new(gfs, l, interp_in_time::Bool; ord_s = 3, ord_t = 2)
                         kcs = [levc.k[m][v][c+ic-2] for m = 1:4]
                         kfss[:, ic] = calc_kfs_from_kcs(kcs, dtc, interp_in_time)
                         ys[ic] =
-                            interp_in_time ? Symb.y(0.5, uc_p[c+ic-2], kcs) : uc_p[c+ic-2]
+                            interp_in_time ? DenseOutput.y(0.5, uc_p[c+ic-2], kcs) :
+                            uc_p[c+ic-2]
                     end
                     # setting k
                     for m = 1:3
@@ -58,10 +59,10 @@ function calc_kfs_from_kcs(kcs, dtc, interp_in_time::Bool)
     t0_f = (interp_in_time) ? 0.5 : 0.0
     thalf_f = (interp_in_time) ? 0.75 : 0.25
     dtf = 0.5 * dtc
-    d1yc_t0 = Symb.dy(1)(t0_f, dtc, kcs)
-    d1yc = Symb.dy(1)(thalf_f, dtc, kcs)
-    d2yc = Symb.dy(2)(thalf_f, dtc, kcs)
-    d3yc = Symb.dy(3)(thalf_f, dtc, kcs)
+    d1yc_t0 = DenseOutput.dy1(t0_f, dtc, kcs)
+    d1yc = DenseOutput.dy1(thalf_f, dtc, kcs)
+    d2yc = DenseOutput.dy2(thalf_f, dtc, kcs)
+    d3yc = DenseOutput.dy3(thalf_f, dtc, kcs)
     fyd2yc = 4 * (kcs[3] - kcs[2]) / dtc^3
     return [
         dtf * d1yc_t0,
@@ -69,7 +70,6 @@ function calc_kfs_from_kcs(kcs, dtc, interp_in_time::Bool)
         dtf * d1yc + 0.5 * dtf^2 * d2yc + 0.125 * dtf^3 * (d3yc + fyd2yc),
     ]
 end
-=#
 
 #===============================================================================
 Prolongation:
