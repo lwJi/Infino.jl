@@ -2,6 +2,8 @@ module Symb
 
 using Symbolics
 
+export theta, h, k, yn, y, dy
+
 #===============================================================================
 RK's interpolant, termed dense output
 ===============================================================================#
@@ -14,12 +16,8 @@ b = [
     -1 // 2 * theta^2 + 2 // 3 * theta^3,
 ]
 
-y_symb = yn + sum([b[i] * k[i] for i = 1:length(b)])
+y = yn + sum([b[i] * k[i] for i = 1:length(b)])
 
-dy_symb(ord) = expand_derivatives((Differential(theta)^ord)(y_symb)) / h^ord
-
-# build function
-y = build_function(y_symb, theta, yn, k, expression = Val{false})
-dy(ord) = build_function(dy_symb(ord), theta, h, k, expression = Val{false})
+dy(ord) = expand_derivatives((Differential(theta)^ord)(y)) / h^ord
 
 end
