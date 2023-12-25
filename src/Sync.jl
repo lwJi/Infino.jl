@@ -56,8 +56,8 @@ function Prolongation_new(gfs, l, interp_in_time::Bool; ord_s = 3)
 end
 
 function calc_kfs_from_kcs(kcs, dtc, interp_in_time::Bool)
-    t0_f = (interp_in_time) ? 0.5 : 0.0
-    thalf_f = (interp_in_time) ? 0.75 : 0.25
+    t0_f = interp_in_time ? 0.5 : 0.0
+    thalf_f = interp_in_time ? 0.75 : 0.25
     dtf = 0.5 * dtc
     d1yc_t0 = DenseOutput.dy1(t0_f, dtc, kcs)
     d1yc = DenseOutput.dy1(thalf_f, dtc, kcs)
