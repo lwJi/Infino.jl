@@ -1,6 +1,6 @@
 using Infino
 
-function example_ode!(lev, r, u; interior_only = false)
+function example_ode!(lev, r, u)
     t = lev.time
     y = u[1]
     y_rhs = r[1]
