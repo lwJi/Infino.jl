@@ -129,22 +129,26 @@ function rk4_new!(f::Function, levf)
     @. u_p = u * 1.0
     lev.time = t
     f(lev, k1, u; interior_only = true)
-    @. u += k1 * (dt / 6)
+    @. k1 *= dt
+    @. u += k1 * (1 / 6)
 
-    @. w = u_p + k1 * (dt / 2)
+    @. w = u_p + k1 * (1 / 2)
     lev.time = t + 0.5 * dt
     f(lev, k2, w; interior_only = true)
-    @. u += k2 * (dt / 3)
+    @. k2 *= dt
+    @. u += k2 * (1 / 3)
 
-    @. w = u_p + k2 * (dt / 2)
+    @. w = u_p + k2 * (1 / 2)
     lev.time = t + 0.5 * dt
     f(lev, k3, w; interior_only = true)
-    @. u += k3 * (dt / 3)
+    @. k3 *= dt
+    @. u += k3 * (1 / 3)
 
-    @. w = u_p + k3 * dt
+    @. w = u_p + k3
     lev.time = t + dt
     f(lev, k4, w; interior_only = true)
-    @. u += k4 * (dt / 6)
+    @. k4 *= dt
+    @. u += k4 * (1 / 6)
     lev.time = t + dt
 end
 
