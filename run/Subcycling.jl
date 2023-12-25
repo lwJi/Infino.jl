@@ -64,11 +64,13 @@ function main(pars, out_dir)
         println("Initial data type '$initial_data' unsupported yet")
         exit()
     end
+
     Infino.Boundary.ApplyPeriodicBoundaryCondition!(gfs)
     if !Mongwane
         Infino.InitialData.MarchBackwards!(gfs)
         Infino.Boundary.ApplyPeriodicBoundaryCondition!(gfs)
     end
+
     @printf(
         "Simulation time: %.4f, iteration %d. E = %.4f\n",
         gfs.grid.time,
@@ -81,9 +83,11 @@ function main(pars, out_dir)
     # Evolve #
     ##########
     println("Start evolution...")
+
     for i = 1:itlast
         Infino.ODESolver.Evolve!(Infino.Physical.WaveRHS!, gfs; Mongwane = Mongwane)
         Infino.Boundary.ApplyPeriodicBoundaryCondition!(gfs)
+
         @printf(
             "Simulation time: %.4f, iteration %d. E = %.4f\n",
             gfs.grid.time,
