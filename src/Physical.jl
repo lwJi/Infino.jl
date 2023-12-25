@@ -8,7 +8,7 @@ WaveRHS!:
         dot(psi) = Pi
         dot(Pi)  = ddpsi
 ===============================================================================#
-function WaveRHS!(lev, r, u)
+function WaveRHS!(lev, r, u; interior_only = false)
     psi = u[1]
     Pi = u[2]
     psi_rhs = r[1]
@@ -21,8 +21,10 @@ function WaveRHS!(lev, r, u)
     Derivs.derivs_diss!(psi_diss, psi, lev.dx, lev.fdord)
     Derivs.derivs_diss!(Pi_diss, Pi, lev.dx, lev.fdord)
 
-    @. psi_rhs = Pi + lev.diss * psi_diss
-    @. Pi_rhs = ddpsi + lev.diss * Pi_diss
+    isrt = interior_only ? 1 + lev.nbuf : 1
+    iend = interior_only ? lev.nxa - lev.nbuf : lev.nxa
+    psi_rhs[isrt:iend] = Pi[isrt:iend] + lev.diss * psi_diss[isrt:iend]
+    Pi_rhs[isrt:iend] = ddpsi[isrt:iend] + lev.diss * Pi_diss[isrt:iend]
 end
 
 #===============================================================================
