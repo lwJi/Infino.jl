@@ -25,7 +25,7 @@ function Prolongation_new(gfs, l, interp_in_time::Bool; ord_s = 3)
                 f = (j == 1) ? i : nxa - i + 1
                 c = if2c[f]
                 if aligned[f]
-                    kcs = [levc.k[m][v][c] for m = 1:4]
+                    kcs = [levc.k[m][v][c] * dtc for m = 1:4]
                     kfs = calc_kfs_from_kcs(kcs, dtc, interp_in_time)
                     # setting k
                     for m = 1:3
@@ -37,7 +37,7 @@ function Prolongation_new(gfs, l, interp_in_time::Bool; ord_s = 3)
                     kfss = zeros(Float64, 3, 4)
                     ys = zeros(Float64, 4)
                     for ic = 1:4
-                        kcs = [levc.k[m][v][c+ic-2] for m = 1:4]
+                        kcs = [levc.k[m][v][c+ic-2] * dtc for m = 1:4]
                         kfss[:, ic] = calc_kfs_from_kcs(kcs, dtc, interp_in_time)
                         ys[ic] =
                             interp_in_time ? DenseOutput.y(0.5, uc_p[c+ic-2], kcs) :
