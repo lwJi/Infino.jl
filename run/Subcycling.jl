@@ -26,12 +26,15 @@ function main(pars, out_dir)
     ########################
     nx = pars["parameters"]["nx"]
     ngh = pars["parameters"]["ngh"]
+    nbuf = pars["parameters"]["nbuf"]
     itlast = pars["parameters"]["itlast"]
     out_every = pars["parameters"]["out_every"]
     bbox = pars["parameters"]["bbox"]
     cfl = haskey(pars["parameters"], "cfl") ? pars["parameters"]["cfl"] : 0.25
     subcycling =
         haskey(pars["parameters"], "subcycling") ? pars["parameters"]["subcycling"] : true
+    Mongwane =
+        haskey(pars["parameters"], "Mongwane") ? pars["parameters"]["Mongwane"] : false
     initial_data =
         haskey(pars["parameters"], "initial_data") ? pars["parameters"]["initial_data"] :
         "Gaussian"
@@ -45,7 +48,6 @@ function main(pars, out_dir)
     ########################
     # build grid structure #
     ########################
-    nbuf = ngh * 4
     grid = Infino.Basic.Grid(nx, bbox, ngh, nbuf; cfl = cfl, subcycling = subcycling)
     gfs = Infino.Basic.GridFunction(2, grid)
 
@@ -63,8 +65,10 @@ function main(pars, out_dir)
         exit()
     end
     Infino.Boundary.ApplyPeriodicBoundaryCondition!(gfs)
-    Infino.InitialData.MarchBackwards!(gfs)
-    Infino.Boundary.ApplyPeriodicBoundaryCondition!(gfs)
+    if !Mongwane
+        Infino.InitialData.MarchBackwards!(gfs)
+        Infino.Boundary.ApplyPeriodicBoundaryCondition!(gfs)
+    end
     @printf(
         "Simulation time: %.4f, iteration %d. E = %.4f\n",
         gfs.grid.time,
@@ -78,7 +82,7 @@ function main(pars, out_dir)
     ##########
     println("Start evolution...")
     for i = 1:itlast
-        Infino.ODESolver.Evolve!(Infino.Physical.WaveRHS!, gfs)
+        Infino.ODESolver.Evolve!(Infino.Physical.WaveRHS!, gfs; Mongwane)
         Infino.Boundary.ApplyPeriodicBoundaryCondition!(gfs)
         @printf(
             "Simulation time: %.4f, iteration %d. E = %.4f\n",
