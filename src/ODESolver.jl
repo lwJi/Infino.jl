@@ -14,10 +14,10 @@ function Evolve!(f::Function, gfs; Mongwane = false)
     #----------------------------------------#
     for l = 1:lmax  # notice that we march coarse level first
         if l > 1
-            Mongwane ? Sync.Prolongation_new(gfs, l, false) :
+            Mongwane ? Sync.Prolongation_Mongwane(gfs, l, false) :
             Sync.Prolongation(gfs, l, false)
         end
-        Mongwane ? rk4_new!(f, gfs.levs[l]) : rk4!(f, gfs.levs[l])
+        Mongwane ? rk4_Mongwane!(f, gfs.levs[l]) : rk4!(f, gfs.levs[l])
     end
 
     #-------------------------------------------------#
@@ -39,9 +39,10 @@ function Evolve!(f::Function, gfs; Mongwane = false)
                         Sync.Restriction(gfs, l)  # from l+1 to l
                     end
                     # from l-1 to l
-                    Mongwane ? Sync.Prolongation_new(gfs, l, mod(substeps[l], 2) == 0) :
+                    Mongwane ?
+                    Sync.Prolongation_Mongwane(gfs, l, mod(substeps[l], 2) == 0) :
                     Sync.Prolongation(gfs, l, mod(substeps[l], 2) == 0)
-                    Mongwane ? rk4_new!(f, gfs.levs[l]) : rk4!(f, gfs.levs[l])
+                    Mongwane ? rk4_Mongwane!(f, gfs.levs[l]) : rk4!(f, gfs.levs[l])
                 end
             end
         end
@@ -114,7 +115,7 @@ function rk4!(f::Function, levf)
     lev.time = t + dt
 end
 
-function rk4_new!(f::Function, levf)
+function rk4_Mongwane!(f::Function, levf)
     u = levf.u
     u_p = levf.u_p
     r = levf.rhs

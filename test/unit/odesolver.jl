@@ -50,7 +50,7 @@ end
     @. u = analytical_solution.(0)
     # evolution
     for i = 1:4
-        Infino.ODESolver.rk4_new!(example_ode!, gfs.levs[1])
+        Infino.ODESolver.rk4_Mongwane!(example_ode!, gfs.levs[1])
     end
     t = g.levs[1].time
     @test isapprox(gfs.levs[1].u[1][1], analytical_solution(t); rtol = 1e-4)
