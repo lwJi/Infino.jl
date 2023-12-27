@@ -7,6 +7,7 @@ mutable struct Level
     nx::Int64  # num of interior grid points
     ngh::Int64  # num of ghost points
     nbuf::Int64  # num of buffer points
+    ntrans::Int64  # num of transition zone points
     nxa::Int64  # num of all grid points
     fdord::Int64  # finite difference order
     xbox::Array{Float64,1}  # size computational domain (interior)
@@ -19,10 +20,25 @@ mutable struct Level
     if2c::Array{Int64,1}  # map between indexes of current and its parent level
     aligned::Array{Bool,1}  # if grid aligned with coarse grid
 
-    function Level(nx, ngh, nbuf, fdord, xbox, dt, t, diss, is_lev1, if2c, aligned)
+    function Level(nx, ngh, nbuf, ntrans, fdord, xbox, dt, t, diss, is_lev1, if2c, aligned)
         nxa = nx + 2 * nbuf
         dx = (xbox[2] - xbox[1]) / (nx - 1)
-        new(nx, ngh, nbuf, nxa, fdord, xbox, dx, dt, t, diss, is_lev1, if2c, aligned)
+        new(
+            nx,
+            ngh,
+            nbuf,
+            ntrans,
+            nxa,
+            fdord,
+            xbox,
+            dx,
+            dt,
+            t,
+            diss,
+            is_lev1,
+            if2c,
+            aligned,
+        )
     end
 
 end
@@ -82,6 +98,7 @@ mutable struct Grid
         xboxs::Vector{Vector{Float64}},
         ngh,
         nbuf;
+        ntrans = 0,
         fdord = 4,
         cfl = 0.4,
         t = 0.0,
@@ -92,7 +109,7 @@ mutable struct Grid
         # build the first level (base level)
         dx1 = (xboxs[1][2] - xboxs[1][1]) / (nx1 - 1)
         dt1 = subcycling ? cfl * dx1 : cfl * dx1 / 2^(length(xboxs) - 1)
-        lev1 = Level(nx1, ngh, nbuf, fdord, xboxs[1], dt1, t, diss, true, [], [])
+        lev1 = Level(nx1, ngh, nbuf, ntrans, fdord, xboxs[1], dt1, t, diss, true, [], [])
         levs = Vector{Level}([lev1])
         # build the rest levels
         for i = 2:length(xboxs)
@@ -114,7 +131,20 @@ mutable struct Grid
             # build level
             push!(
                 levs,
-                Level(nx, ngh, nbuf, fdord, xbox, dt, t, diss, false, if2c, aligned),
+                Level(
+                    nx,
+                    ngh,
+                    nbuf,
+                    ntrans,
+                    fdord,
+                    xbox,
+                    dt,
+                    t,
+                    diss,
+                    false,
+                    if2c,
+                    aligned,
+                ),
             )
         end
         if verbose  # print
