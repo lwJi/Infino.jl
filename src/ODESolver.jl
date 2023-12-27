@@ -17,7 +17,7 @@ function Evolve!(f::Function, gfs; Mongwane = false)
             Mongwane ? Sync.Prolongation_Mongwane(gfs, l, false) :
             Sync.Prolongation(gfs, l, false)
         end
-        Mongwane ? rk4_Mongwane!(f, gfs.levs[l]) : rk4!(f, gfs.levs[l])
+        Mongwane ? (rk4_Mongwane!(f, gfs.levs[l])) : rk4!(f, gfs.levs[l])
     end
 
     #-------------------------------------------------#
@@ -42,7 +42,7 @@ function Evolve!(f::Function, gfs; Mongwane = false)
                     Mongwane ?
                     Sync.Prolongation_Mongwane(gfs, l, mod(substeps[l], 2) == 0) :
                     Sync.Prolongation(gfs, l, mod(substeps[l], 2) == 0)
-                    Mongwane ? rk4_Mongwane!(f, gfs.levs[l]) : rk4!(f, gfs.levs[l])
+                    Mongwane ? (rk4_Mongwane!(f, gfs.levs[l])) : rk4!(f, gfs.levs[l])
                 end
             end
         end

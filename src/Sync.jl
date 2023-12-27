@@ -4,6 +4,28 @@ include("Algo.jl")
 include("DenseOutput.jl")
 
 #===============================================================================
+Functions needed by Mongwane's subcycling method
+===============================================================================#
+function calc_kfs_from_kcs(kcs, dtc, interp_in_time::Bool)
+    t0_f = interp_in_time ? 0.5 : 0.0
+    dtf = 0.5 * dtc
+    d1yc = DenseOutput.dy1(t0_f, dtc, kcs)
+    d2yc = DenseOutput.dy2(t0_f, dtc, kcs)
+    d3yc = DenseOutput.dy3(t0_f, dtc, kcs)
+    fyd2yc = 4 * (kcs[3] - kcs[2]) / dtc^3
+    return [
+        dtf * d1yc,
+        dtf * d1yc + 0.5 * dtf^2 * d2yc + 0.125 * dtf^3 * (d3yc - fyd2yc),
+        dtf * d1yc + 0.5 * dtf^2 * d2yc + 0.125 * dtf^3 * (d3yc + fyd2yc),
+    ]
+end
+
+#===============================================================================
+ApplyTransitionZone: apply transition zone
+===============================================================================#
+function ApplyTransitionZone(gfs, l) end
+
+#===============================================================================
 Prolongation_Mongwane: use Mongwane's method
     * from level l-1 to level l
     * we assume that we always march coarse level first (for l in 2:lmax)
@@ -53,20 +75,6 @@ function Prolongation_Mongwane(gfs, l, interp_in_time::Bool; ord_s = 3)
             end
         end
     end
-end
-
-function calc_kfs_from_kcs(kcs, dtc, interp_in_time::Bool)
-    t0_f = interp_in_time ? 0.5 : 0.0
-    dtf = 0.5 * dtc
-    d1yc = DenseOutput.dy1(t0_f, dtc, kcs)
-    d2yc = DenseOutput.dy2(t0_f, dtc, kcs)
-    d3yc = DenseOutput.dy3(t0_f, dtc, kcs)
-    fyd2yc = 4 * (kcs[3] - kcs[2]) / dtc^3
-    return [
-        dtf * d1yc,
-        dtf * d1yc + 0.5 * dtf^2 * d2yc + 0.125 * dtf^3 * (d3yc - fyd2yc),
-        dtf * d1yc + 0.5 * dtf^2 * d2yc + 0.125 * dtf^3 * (d3yc + fyd2yc),
-    ]
 end
 
 #===============================================================================
