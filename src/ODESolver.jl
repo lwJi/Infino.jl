@@ -6,7 +6,7 @@ include("Sync.jl")
 Eovlve!:
     * evolve one complete time step for all levels
 ===============================================================================#
-function Evolve!(f::Function, gfs; Mongwane = false)
+function Evolve!(f::Function, gfs; Mongwane = false, apply_trans_zone = false)
     lmax = length(gfs.levs)
 
     #----------------------------------------#
@@ -17,7 +17,10 @@ function Evolve!(f::Function, gfs; Mongwane = false)
             Mongwane ? Sync.Prolongation_Mongwane(gfs, l, false) :
             Sync.Prolongation(gfs, l, false)
         end
-        Mongwane ? (rk4_Mongwane!(f, gfs.levs[l])) : rk4!(f, gfs.levs[l])
+        if apply_trans_zone
+            ApplyTransitionZone(gfs, l, false)
+        end
+        Mongwane ? rk4_Mongwane!(f, gfs.levs[l]) : rk4!(f, gfs.levs[l])
     end
 
     #-------------------------------------------------#
@@ -36,13 +39,16 @@ function Evolve!(f::Function, gfs; Mongwane = false)
                 )
                     substeps[l] += 1
                     if l < lmax
-                        Sync.Restriction(gfs, l)  # from l+1 to l
+                        Sync.Restriction(gfs, l; apply_trans_zone)  # from l+1 to l
                     end
                     # from l-1 to l
                     Mongwane ?
                     Sync.Prolongation_Mongwane(gfs, l, mod(substeps[l], 2) == 0) :
                     Sync.Prolongation(gfs, l, mod(substeps[l], 2) == 0)
-                    Mongwane ? (rk4_Mongwane!(f, gfs.levs[l])) : rk4!(f, gfs.levs[l])
+                    if apply_trans_zone
+                        ApplyTransitionZone(gfs, l, mod(substeps[l], 2) == 0)
+                    end
+                    Mongwane ? rk4_Mongwane!(f, gfs.levs[l]) : rk4!(f, gfs.levs[l])
                 end
             end
         end
@@ -52,7 +58,7 @@ function Evolve!(f::Function, gfs; Mongwane = false)
     # Restriction all levels #
     #------------------------#
     for l = lmax-1:-1:1  # notice that we restrict fine level first
-        Sync.Restriction(gfs, l)
+        Sync.Restriction(gfs, l; apply_trans_zone)
     end
 
     #------------------#

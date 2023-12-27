@@ -20,10 +20,66 @@ function calc_kfs_from_kcs(kcs, dtc, interp_in_time::Bool)
     ]
 end
 
+function transition_profile(a, b, x; type = 1)
+    @assert(b > a, "b less then a is not allowed")
+    t0 = (x - a) / (b - a)
+    t = t0 < 0 ? 0 : (t0 > 1 ? 1 : t0)
+
+    if type == 1  # boxstep
+        return t
+    elseif type == 2  # smoothstep
+        return 3 * t^2 - 2 * t^3
+    elseif type == 3  # smootherstep
+        return 10 * t^3 - 15 * t^4 + 6 * t^5
+    else
+        println("Transition profile (type $type) is not supported yet.")
+        exit()
+    end
+end
+
 #===============================================================================
 ApplyTransitionZone: apply transition zone
 ===============================================================================#
-function ApplyTransitionZone(gfs, l) end
+function ApplyTransitionZone(gfs, l, interp_in_time::Bool; ord_s = 3)
+    nxa = gfs.grid.levs[l].nxa
+    nbuf = gfs.grid.levs[l].nbuf
+    ntrans = gfs.grid.levs[l].ntrans
+    if2c = gfs.grid.levs[l].if2c
+    aligned = gfs.grid.levs[l].aligned
+    levf = gfs.levs[l]
+    levc = gfs.levs[l-1]
+    # for transition zone
+    xbox = gfs.grid.levs[l].xbox
+    dxf = gfs.grid.levs[l].dx
+
+    for j = 1:2  # left or right
+        a = (j == 1) ? xbox[1] : xbox[2] - (ntrans - 1) * dxf
+        b = (j == 1) ? xbox[1] + (ntrans - 1) * dxf : xbox[2]
+        for v = 1:gfs.nd
+            uf = levf.u[v]
+            uc_p = levc.u_p[v]
+            for i = 1:ntrans
+                f = (j == 1) ? i + nbuf : nxa - i + 1 - nbuf
+                c = if2c[f]
+                w = transition_profile(a, b, gfs.levs[l].x[f])
+                if aligned[f]
+                    kcs = [levc.k[m][v][c] for m = 1:4]
+                    ys = interp_in_time ? DenseOutput.y(0.5, uc_p[c], kcs) : uc_p[c]
+                    uf[f] = (1 - w) * ys + w * uf[f]
+                else
+                    ys = zeros(Float64, 4)
+                    for ic = 1:4
+                        kcs = [levc.k[m][v][c+ic-2] for m = 1:4]
+                        ys[ic] =
+                            interp_in_time ? DenseOutput.y(0.5, uc_p[c+ic-2], kcs) :
+                            uc_p[c+ic-2]
+                    end
+                    uf[f] = (1 - w) * Algo.Interpolation(ys, 2, ord_s) + w * uf[f]
+                end
+            end
+        end
+    end
+end
 
 #===============================================================================
 Prolongation_Mongwane: use Mongwane's method
@@ -131,15 +187,18 @@ Restriction:
     * we assume that we always march fine level first (for l in lmax-1:-1:1)
     * we assume all the levels are at the same time slice
 ===============================================================================#
-function Restriction(gfs, l)
+function Restriction(gfs, l; apply_trans_zone = false)
     nxa = gfs.grid.levs[l+1].nxa
     nbuf = gfs.grid.levs[l+1].nbuf
+    ntrans = gfs.grid.levs[l+1].ntrans
     if2c = gfs.grid.levs[l+1].if2c
     aligned = gfs.grid.levs[l+1].aligned
+    isrt = apply_trans_zone ? 1 + nbuf + ntrans : 1 + nbuf
+    iend = apply_trans_zone ? nxa - nbuf - ntrans : nxa - nbuf
     for v = 1:gfs.nd
         uf = gfs.levs[l+1].u[v]
         uc = gfs.levs[l].u[v]
-        for f = 1+nbuf:nxa-nbuf  # only interior
+        for f = isrt:iend  # only interior
             if aligned[f]
                 uc[if2c[f]] = uf[f]
             end
