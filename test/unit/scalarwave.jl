@@ -165,12 +165,12 @@ end
         @test isapprox(
             gfs.levs[l].u[1][1+nbuf:nxa-nbuf],
             analytical_psi.(t, x)[1+nbuf:nxa-nbuf];
-            rtol = 1e-5,
+            rtol = 1e-6,
         )
         @test isapprox(
             gfs.levs[l].u[2][1+nbuf:nxa-nbuf],
             analytical_Pi.(t, x)[1+nbuf:nxa-nbuf];
-            rtol = 1e-4,
+            rtol = 1e-5,
         )
     end
 end
