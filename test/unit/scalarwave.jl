@@ -155,7 +155,12 @@ end
     Infino.Boundary.ApplyPeriodicBoundaryCondition!(gfs)
     # evolution
     for i = 1:4
-        Infino.ODESolver.Evolve!(Infino.Physical.WaveRHS!, gfs; Mongwane = true)
+        Infino.ODESolver.Evolve!(
+            Infino.Physical.WaveRHS!,
+            gfs;
+            Mongwane = true,
+            apply_trans_zone = true,
+        )
     end
     t = g.time
     for l = 1:lmax

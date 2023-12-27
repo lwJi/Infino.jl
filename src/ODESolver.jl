@@ -16,9 +16,9 @@ function Evolve!(f::Function, gfs; Mongwane = false, apply_trans_zone = false)
         if l > 1
             Mongwane ? Sync.Prolongation_Mongwane(gfs, l, false) :
             Sync.Prolongation(gfs, l, false)
-        end
-        if apply_trans_zone
-            ApplyTransitionZone(gfs, l, false)
+            if apply_trans_zone
+                Sync.ApplyTransitionZone(gfs, l, false)
+            end
         end
         Mongwane ? rk4_Mongwane!(f, gfs.levs[l]) : rk4!(f, gfs.levs[l])
     end
@@ -46,7 +46,7 @@ function Evolve!(f::Function, gfs; Mongwane = false, apply_trans_zone = false)
                     Sync.Prolongation_Mongwane(gfs, l, mod(substeps[l], 2) == 0) :
                     Sync.Prolongation(gfs, l, mod(substeps[l], 2) == 0)
                     if apply_trans_zone
-                        ApplyTransitionZone(gfs, l, mod(substeps[l], 2) == 0)
+                        Sync.ApplyTransitionZone(gfs, l, mod(substeps[l], 2) == 0)
                     end
                     Mongwane ? rk4_Mongwane!(f, gfs.levs[l]) : rk4!(f, gfs.levs[l])
                 end
