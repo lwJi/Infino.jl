@@ -15,4 +15,18 @@ function ApplyPeriodicBoundaryCondition!(gfs)
     end
 end
 
+function ApplyPeriodicBoundaryConditionRHS!(lev, r)
+    nxa = lev.nxa
+    nbuf = lev.nbuf
+    for v = 1:length(r)
+        rhs = r[v]
+        for i = 1:nbuf
+            rhs[i] = rhs[nxa-2*nbuf+i]
+        end
+        for i = nxa:-1:nxa-nbuf+1
+            rhs[i] = rhs[2*nbuf-nxa+i]
+        end
+    end
+end
+
 end

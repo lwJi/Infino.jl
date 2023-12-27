@@ -1,6 +1,7 @@
 module Physical
 
 include("Derivs.jl")
+include("Boundary.jl")
 
 #===============================================================================
 WaveRHS!:
@@ -23,6 +24,10 @@ function WaveRHS!(lev, r, u)
 
     @. psi_rhs = Pi + lev.diss * psi_diss
     @. Pi_rhs = ddpsi + lev.diss * Pi_diss
+
+    if lev.is_lev1
+        Boundary.ApplyPeriodicBoundaryConditionRHS!(lev, r)
+    end
 end
 
 #===============================================================================

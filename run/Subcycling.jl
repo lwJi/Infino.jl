@@ -86,7 +86,6 @@ function main(pars, out_dir)
 
     for i = 1:itlast
         Infino.ODESolver.Evolve!(Infino.Physical.WaveRHS!, gfs; Mongwane = Mongwane)
-        Infino.Boundary.ApplyPeriodicBoundaryCondition!(gfs)
 
         @printf(
             "Simulation time: %.4f, iteration %d. E = %.4f\n",
