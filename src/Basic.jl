@@ -14,14 +14,15 @@ mutable struct Level
     dt::Float64
     time::Float64
     diss::Float64
+    is_lev1::Bool
     # dimension nxa
     if2c::Array{Int64,1}  # map between indexes of current and its parent level
     aligned::Array{Bool,1}  # if grid aligned with coarse grid
 
-    function Level(nx, ngh, nbuf, fdord, xbox, dt, t, diss, if2c, aligned)
+    function Level(nx, ngh, nbuf, fdord, xbox, dt, t, diss, is_lev1, if2c, aligned)
         nxa = nx + 2 * nbuf
         dx = (xbox[2] - xbox[1]) / (nx - 1)
-        new(nx, ngh, nbuf, nxa, fdord, xbox, dx, dt, t, diss, if2c, aligned)
+        new(nx, ngh, nbuf, nxa, fdord, xbox, dx, dt, t, diss, is_lev1, if2c, aligned)
     end
 
 end
@@ -91,7 +92,7 @@ mutable struct Grid
         # build the first level (base level)
         dx1 = (xboxs[1][2] - xboxs[1][1]) / (nx1 - 1)
         dt1 = subcycling ? cfl * dx1 : cfl * dx1 / 2^(length(xboxs) - 1)
-        lev1 = Level(nx1, ngh, nbuf, fdord, xboxs[1], dt1, t, diss, [], [])
+        lev1 = Level(nx1, ngh, nbuf, fdord, xboxs[1], dt1, t, diss, true, [], [])
         levs = Vector{Level}([lev1])
         # build the rest levels
         for i = 2:length(xboxs)
@@ -111,7 +112,10 @@ mutable struct Grid
             if2c = div.(((imin-nbuf:imax+nbuf) .+ 1), 2) .+ nbuf
             aligned = mod.(((imin-nbuf:imax+nbuf) .+ 1), 2) .== 0
             # build level
-            push!(levs, Level(nx, ngh, nbuf, fdord, xbox, dt, t, diss, if2c, aligned))
+            push!(
+                levs,
+                Level(nx, ngh, nbuf, fdord, xbox, dt, t, diss, false, if2c, aligned),
+            )
         end
         if verbose  # print
             println("Grid Structure:")
