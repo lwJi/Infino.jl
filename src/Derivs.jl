@@ -18,7 +18,7 @@ end
 function deriv_2nd(u, i, dx, ord)
     if ord == 2
         return (u[i-1] - 2 * u[i] + u[i+1]) / (dx * dx)
-    elseif (ord == 4)
+    elseif ord == 4
         return (-u[i-2] + 16 * u[i-1] - 30 * u[i] + 16 * u[i+1] - u[i+2]) / (12 * dx * dx)
     else
         println("Finite difference order not supported yet: ord = ", ord)
