@@ -126,8 +126,8 @@ function rk4_new!(f::Function, levf)
     lev = levf.lev
     t = lev.time
     dt = lev.dt
-    isrt = 1 + lev.nbuf
-    iend = lev.nxa - lev.nbuf
+    isrt = lev.is_lev1 ? 1 : 1 + lev.nbuf
+    iend = lev.is_lev1 ? lev.nxa : lev.nxa - lev.nbuf
 
     @. u_p = u * 1.0
     lev.time = t

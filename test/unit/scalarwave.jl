@@ -130,7 +130,6 @@ end
     end
 end
 
-#=
 @testset "Scalar Wave Evolution on 3 Levels Grid with Mongwane's Subcycling" begin
     g = Infino.Basic.Grid(
         100,
@@ -175,4 +174,3 @@ end
         )
     end
 end
-=#
