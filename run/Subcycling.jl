@@ -35,6 +35,9 @@ function main(pars, out_dir)
         haskey(pars["parameters"], "subcycling") ? pars["parameters"]["subcycling"] : true
     Mongwane =
         haskey(pars["parameters"], "Mongwane") ? pars["parameters"]["Mongwane"] : false
+    apply_trans_zone =
+        haskey(pars["parameters"], "apply_trans_zone") ?
+        pars["parameters"]["apply_trans_zone"] : false
     initial_data =
         haskey(pars["parameters"], "initial_data") ? pars["parameters"]["initial_data"] :
         "Gaussian"
@@ -85,7 +88,12 @@ function main(pars, out_dir)
     println("Start evolution...")
 
     for i = 1:itlast
-        Infino.ODESolver.Evolve!(Infino.Physical.WaveRHS!, gfs; Mongwane = Mongwane)
+        Infino.ODESolver.Evolve!(
+            Infino.Physical.WaveRHS!,
+            gfs;
+            Mongwane = Mongwane,
+            apply_trans_zone = apply_trans_zone,
+        )
 
         @printf(
             "Simulation time: %.4f, iteration %d. E = %.4f\n",
