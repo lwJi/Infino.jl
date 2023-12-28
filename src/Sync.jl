@@ -21,7 +21,8 @@ function calc_kfs_from_kcs(kcs, dtc, interp_in_time::Bool)
 end
 
 function transition_profile(a, b, x; type = 1)
-    @assert(b > a, "b less then a is not allowed")
+    @assert(b - x > -1e-12, "b less then a is not allowed")
+    @assert(x - a > -1e-12, "b less then a is not allowed")
     t0 = (x - a) / (b - a)
     t = t0 < 0 ? 0 : (t0 > 1 ? 1 : t0)
 
