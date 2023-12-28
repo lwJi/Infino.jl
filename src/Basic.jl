@@ -98,7 +98,7 @@ mutable struct Grid
         xboxs::Vector{Vector{Float64}},
         ngh,
         nbuf;
-        ntrans = 0,
+        ntrans = 3,
         fdord = 4,
         cfl = 0.4,
         t = 0.0,
