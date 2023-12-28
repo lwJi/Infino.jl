@@ -20,10 +20,8 @@ function calc_kfs_from_kcs(kcs, dtc, interp_in_time::Bool)
     ]
 end
 
-function transition_profile(a, b, x; type = 1)
-    @assert(b - x > -1e-12, "b less then a is not allowed")
-    @assert(x - a > -1e-12, "b less then a is not allowed")
-    t0 = (x - a) / (b - a)
+function transition_profile(xl, xh, x; type = 1)
+    t0 = (x - xl) / (xh - xl)
     t = t0 < 0 ? 0 : (t0 > 1 ? 1 : t0)
 
     if type == 1  # boxstep
@@ -52,10 +50,12 @@ function ApplyTransitionZone(gfs, l, interp_in_time::Bool; ord_s = 3)
     # for transition zone
     xbox = gfs.grid.levs[l].xbox
     dxf = gfs.grid.levs[l].dx
+    @assert(isapprox(xbox[1], gfs.levs[l].x[1+nbuf]; rtol = 1e-12))
+    @assert(isapprox(xbox[2], gfs.levs[l].x[nxa-nbuf]; rtol = 1e-12))
 
     for j = 1:2  # left or right
-        a = (j == 1) ? xbox[1] : xbox[2] - (ntrans - 1) * dxf
-        b = (j == 1) ? xbox[1] + (ntrans - 1) * dxf : xbox[2]
+        a = (j == 1) ? xbox[1] : xbox[2]
+        b = (j == 1) ? xbox[1] + (ntrans - 1) * dxf : xbox[2] - (ntrans - 1) * dxf
         for v = 1:gfs.nd
             uf = levf.u[v]
             uc_p = levc.u_p[v]
