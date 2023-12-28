@@ -35,6 +35,7 @@ function main(pars, out_dir)
         haskey(pars["parameters"], "subcycling") ? pars["parameters"]["subcycling"] : true
     Mongwane =
         haskey(pars["parameters"], "Mongwane") ? pars["parameters"]["Mongwane"] : false
+    ntrans = haskey(pars["parameters"], "ntrans") ? pars["parameters"]["ntrans"] : 3
     apply_trans_zone =
         haskey(pars["parameters"], "apply_trans_zone") ?
         pars["parameters"]["apply_trans_zone"] : false
@@ -53,7 +54,15 @@ function main(pars, out_dir)
     ########################
     # build grid structure #
     ########################
-    grid = Infino.Basic.Grid(nx, bbox, ngh, nbuf; cfl = cfl, subcycling = subcycling)
+    grid = Infino.Basic.Grid(
+        nx,
+        bbox,
+        ngh,
+        nbuf;
+        ntrans = ntrans,
+        cfl = cfl,
+        subcycling = subcycling,
+    )
     gfs = Infino.Basic.GridFunction(2, grid)
 
     ###############
