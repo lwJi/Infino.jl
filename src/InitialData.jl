@@ -9,7 +9,7 @@ include("Physical.jl")
 Initial Data Types:
     * Gaussian
 ===============================================================================#
-function Gaussian!(gfs; amp = 1.0, sig = 0.2, x0 = 0.0)
+function Gaussian!(gfs; amp = 1.0, sig = 0.25, x0 = 0.0)
     lmax = length(gfs.levs)
     for l = 1:lmax
         psi = gfs.levs[l].u[1]
