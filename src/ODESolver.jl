@@ -28,13 +28,12 @@ function Evolve!(f::Function, gfs; Mongwane = false, apply_trans_zone = false)
     #-------------------------------------------------#
     if gfs.grid.subcycling
         levs = gfs.grid.levs
-        tiny = 1e-12
         dt_min = levs[lmax].dt
         substeps = ones(Int64, lmax)
         for s = 2:2^(lmax-1)  # from second to final substep (of the finest level)
             for l = 2:lmax  # march all levels except the coarest (from coarse to fine)
                 if l == lmax || (
-                    abs(levs[l].time - levs[l+1].time) < tiny &&
+                    isapprox(levs[l].time, levs[l+1].time; rtol = 1e-12) &&
                     abs(levs[l].time - levs[1].time) > dt_min
                 )
                     substeps[l] += 1
