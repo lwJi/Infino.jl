@@ -31,6 +31,7 @@ function main(pars, out_dir)
     out_every = pars["parameters"]["out_every"]
     bbox = pars["parameters"]["bbox"]
     cfl = haskey(pars["parameters"], "cfl") ? pars["parameters"]["cfl"] : 0.25
+    diss = haskey(pars["parameters"], "diss") ? pars["parameters"]["diss"] : 0.0
     subcycling =
         haskey(pars["parameters"], "subcycling") ? pars["parameters"]["subcycling"] : true
     Mongwane =
@@ -44,6 +45,7 @@ function main(pars, out_dir)
         "Gaussian"
     println("Parameters:")
     println("  cfl        = ", cfl)
+    println("  diss       = ", diss)
     println("  subcycling = ", subcycling)
     println("  Mongwane   = ", Mongwane)
     println("  trans_zone = ", apply_trans_zone)
@@ -61,6 +63,7 @@ function main(pars, out_dir)
         nbuf;
         ntrans = ntrans,
         cfl = cfl,
+        diss = diss,
         subcycling = subcycling,
     )
     gfs = Infino.Basic.GridFunction(2, grid)
