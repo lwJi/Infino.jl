@@ -149,15 +149,17 @@ mutable struct Grid
         end
         if verbose  # print
             println("Grid Structure:")
+            println("  subcycling = ", subcycling)
             for i = 1:length(levs)
                 println("lev[", i, "],")
-                println("  nx    = ", levs[i].nx)
-                println("  ngh   = ", levs[i].ngh)
-                println("  nbuf  = ", levs[i].nbuf)
-                println("  fdord = ", levs[i].fdord)
+                println("  nx     = ", levs[i].nx)
+                println("  ngh    = ", levs[i].ngh)
+                println("  nbuf   = ", levs[i].nbuf)
+                println("  ntrans = ", levs[i].ntrans)
+                println("  fdord  = ", levs[i].fdord)
                 if length(levs[i].if2c) == levs[i].nxa
                     println(
-                        "  ibox  = ",
+                        "  ibox   = ",
                         [
                             levs[i].if2c[1+levs[i].nbuf],
                             levs[i].if2c[levs[i].nxa-levs[i].nbuf],
@@ -169,9 +171,11 @@ mutable struct Grid
                         ],
                     )
                 end
-                println("  xbox  = ", levs[i].xbox)
-                println("  dx    = ", levs[i].dx)
-                println("  dt    = ", levs[i].dt)
+                println("  xbox   = ", levs[i].xbox)
+                println("  dx     = ", levs[i].dx)
+                println("  dt     = ", levs[i].dt)
+                println("  time   = ", levs[i].time)
+                println("  diss   = ", levs[i].diss)
             end
         end
         # construct

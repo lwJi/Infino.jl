@@ -45,8 +45,6 @@ function main(pars, out_dir)
         "Gaussian"
     println("Parameters:")
     println("  cfl        = ", cfl)
-    println("  diss       = ", diss)
-    println("  subcycling = ", subcycling)
     println("  Mongwane   = ", Mongwane)
     println("  trans_zone = ", apply_trans_zone)
     println("  itlast     = ", itlast)
