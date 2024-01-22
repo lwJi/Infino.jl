@@ -37,6 +37,7 @@ function main(pars, out_dir)
     Mongwane =
         haskey(pars["parameters"], "Mongwane") ? pars["parameters"]["Mongwane"] : false
     ntrans = haskey(pars["parameters"], "ntrans") ? pars["parameters"]["ntrans"] : 3
+    ord_s = haskey(pars["parameters"], "ord_s") ? pars["parameters"]["ord_s"] : 3
     apply_trans_zone =
         haskey(pars["parameters"], "apply_trans_zone") ?
         pars["parameters"]["apply_trans_zone"] : false
@@ -60,6 +61,7 @@ function main(pars, out_dir)
         ngh,
         nbuf;
         ntrans = ntrans,
+        ord_s = ord_s,
         cfl = cfl,
         diss = diss,
         subcycling = subcycling,
