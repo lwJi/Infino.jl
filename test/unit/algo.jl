@@ -20,3 +20,10 @@ end
     y = exp.(x)
     @test isapprox(Infino.Algo.Interpolation(y, 2, ord), exp(0.25); rtol = 1e-5)
 end
+
+@testset "5th-Order Interpolaton" begin
+    ord = 5
+    x = LinRange(0.1, 0.4, 6)
+    y = exp.(x)
+    @test isapprox(Infino.Algo.Interpolation(y, 3, ord), exp(0.25); rtol = 1e-6)
+end
