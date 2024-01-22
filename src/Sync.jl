@@ -39,10 +39,11 @@ end
 #===============================================================================
 ApplyTransitionZone: apply transition zone
 ===============================================================================#
-function ApplyTransitionZone(gfs, l, interp_in_time::Bool; ord_s = 3)
+function ApplyTransitionZone(gfs, l, interp_in_time::Bool)
     nxa = gfs.grid.levs[l].nxa
     nbuf = gfs.grid.levs[l].nbuf
     ntrans = gfs.grid.levs[l].ntrans
+    ord_s = gfs.grid.levs[l].ord_s
     if2c = gfs.grid.levs[l].if2c
     aligned = gfs.grid.levs[l].aligned
     levf = gfs.levs[l]
@@ -68,14 +69,17 @@ function ApplyTransitionZone(gfs, l, interp_in_time::Bool; ord_s = 3)
                     ys = interp_in_time ? DenseOutput.y(0.5, uc_p[c], kcs) : uc_p[c]
                     uf[f] = (1 - w) * ys + w * uf[f]
                 else
-                    ys = zeros(Float64, 4)
-                    for ic = 1:4
-                        kcs = [levc.k[m][v][c+ic-2] for m = 1:4]
+                    nys = ord_s + 1
+                    ioffset = (mod(nys, 2) == 0) ? div(nys, 2) : div(nys, 2) + 1
+                    ys = zeros(Float64, nys)
+                    for ic = 1:nys
+                        ic_grid = c + ic - ioffset;
+                        kcs = [levc.k[m][v][ic_grid] for m = 1:4]
                         ys[ic] =
-                            interp_in_time ? DenseOutput.y(0.5, uc_p[c+ic-2], kcs) :
-                            uc_p[c+ic-2]
+                            interp_in_time ? DenseOutput.y(0.5, uc_p[ic_grid], kcs) :
+                            uc_p[ic_grid]
                     end
-                    uf[f] = (1 - w) * Algo.Interpolation(ys, 2, ord_s) + w * uf[f]
+                    uf[f] = (1 - w) * Algo.Interpolation(ys, ioffset, ord_s) + w * uf[f]
                 end
             end
         end
@@ -87,9 +91,10 @@ Prolongation_Mongwane: use Mongwane's method
     * from level l-1 to level l
     * we assume that we always march coarse level first (for l in 2:lmax)
 ===============================================================================#
-function Prolongation_Mongwane(gfs, l, interp_in_time::Bool; ord_s = 3)
+function Prolongation_Mongwane(gfs, l, interp_in_time::Bool)
     nxa = gfs.grid.levs[l].nxa
     nbuf = gfs.grid.levs[l].nbuf
+    ord_s = gfs.grid.levs[l].ord_s
     if2c = gfs.grid.levs[l].if2c
     aligned = gfs.grid.levs[l].aligned
     dtc = gfs.grid.levs[l-1].dt
@@ -113,21 +118,24 @@ function Prolongation_Mongwane(gfs, l, interp_in_time::Bool; ord_s = 3)
                     # setting u
                     uf[f] = interp_in_time ? DenseOutput.y(0.5, uc_p[c], kcs) : uc_p[c]
                 else
-                    kfss = zeros(Float64, 3, 4)
-                    ys = zeros(Float64, 4)
-                    for ic = 1:4
-                        kcs = [levc.k[m][v][c+ic-2] for m = 1:4]
+                    nys = ord_s + 1
+                    ioffset = (mod(nys, 2) == 0) ? div(nys, 2) : div(nys, 2) + 1
+                    kfss = zeros(Float64, 3, nys)
+                    ys = zeros(Float64, nys)
+                    for ic = 1:nys
+                        ic_grid = c + ic - ioffset;
+                        kcs = [levc.k[m][v][ic_grid] for m = 1:4]
                         kfss[:, ic] = calc_kfs_from_kcs(kcs, dtc, interp_in_time)
                         ys[ic] =
-                            interp_in_time ? DenseOutput.y(0.5, uc_p[c+ic-2], kcs) :
-                            uc_p[c+ic-2]
+                            interp_in_time ? DenseOutput.y(0.5, uc_p[ic_grid], kcs) :
+                            uc_p[ic_grid]
                     end
                     # setting k
                     for m = 1:3
-                        levf.k[m][v][f] = Algo.Interpolation(kfss[m, :], 2, ord_s)
+                        levf.k[m][v][f] = Algo.Interpolation(kfss[m, :], ioffset, ord_s)
                     end
                     # setting u
-                    uf[f] = Algo.Interpolation(ys, 2, ord_s)
+                    uf[f] = Algo.Interpolation(ys, ioffset, ord_s)
                 end
             end
         end
@@ -139,9 +147,10 @@ Prolongation:
     * from level l-1 to level l
     * we assume that we always march coarse level first (for l in 2:lmax)
 ===============================================================================#
-function Prolongation(gfs, l, interp_in_time::Bool; ord_s = 3, ord_t = 2)
+function Prolongation(gfs, l, interp_in_time::Bool; ord_t = 2)
     nxa = gfs.grid.levs[l].nxa
     nbuf = gfs.grid.levs[l].nbuf
+    ord_s = gfs.grid.levs[l].ord_s
     if2c = gfs.grid.levs[l].if2c
     aligned = gfs.grid.levs[l].aligned
     levf = gfs.levs[l]
@@ -160,12 +169,15 @@ function Prolongation(gfs, l, interp_in_time::Bool; ord_s = 3, ord_t = 2)
                     if aligned[f]
                         uf[f] = Algo.Interpolation([uc_pp[c], uc_p[c], uc[c]], 2, ord_t)
                     else
-                        ucss = zeros(Float64, 3, 4)
-                        for ic = 1:4
-                            ucss[:, ic] = [uc_pp[c+ic-2], uc_p[c+ic-2], uc[c+ic-2]]
+                        nucss = ord_s + 1
+                        ioffset = (mod(nucss, 2) == 0) ? div(nucss, 2) : div(nucss, 2) + 1
+                        ucss = zeros(Float64, 3, nucss)
+                        for ic = 1:nucss
+                            ic_grid = c + ic - ioffset;
+                            ucss[:, ic] = [uc_pp[ic_grid], uc_p[ic_grid], uc[ic_grid]]
                         end
                         uf[f] = Algo.Interpolation(
-                            [Algo.Interpolation(ucss[m, :], 2, ord_s) for m = 1:3],
+                            [Algo.Interpolation(ucss[m, :], ioffset, ord_s) for m = 1:3],
                             2,
                             ord_t,
                         )

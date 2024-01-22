@@ -10,6 +10,7 @@ mutable struct Level
     ntrans::Int64  # num of transition zone points
     nxa::Int64  # num of all grid points
     fdord::Int64  # finite difference order
+    ord_s::Int64  # interpolation order in space
     xbox::Array{Float64,1}  # size computational domain (interior)
     dx::Float64
     dt::Float64
@@ -20,7 +21,7 @@ mutable struct Level
     if2c::Array{Int64,1}  # map between indexes of current and its parent level
     aligned::Array{Bool,1}  # if grid aligned with coarse grid
 
-    function Level(nx, ngh, nbuf, ntrans, fdord, xbox, dt, t, diss, is_lev1, if2c, aligned)
+    function Level(nx, ngh, nbuf, ntrans, fdord, ord_s, xbox, dt, t, diss, is_lev1, if2c, aligned)
         nxa = nx + 2 * nbuf
         dx = (xbox[2] - xbox[1]) / (nx - 1)
         new(
@@ -30,6 +31,7 @@ mutable struct Level
             ntrans,
             nxa,
             fdord,
+            ord_s,
             xbox,
             dx,
             dt,
@@ -100,6 +102,7 @@ mutable struct Grid
         nbuf;
         ntrans = 3,
         fdord = 4,
+        ord_s = 5,
         cfl = 0.4,
         t = 0.0,
         diss = 0.0,
@@ -109,7 +112,7 @@ mutable struct Grid
         # build the first level (base level)
         dx1 = (xboxs[1][2] - xboxs[1][1]) / (nx1 - 1)
         dt1 = subcycling ? cfl * dx1 : cfl * dx1 / 2^(length(xboxs) - 1)
-        lev1 = Level(nx1, ngh, nbuf, ntrans, fdord, xboxs[1], dt1, t, diss, true, [], [])
+        lev1 = Level(nx1, ngh, nbuf, ntrans, fdord, ord_s, xboxs[1], dt1, t, diss, true, [], [])
         levs = Vector{Level}([lev1])
         # build the rest levels
         for i = 2:length(xboxs)
@@ -137,6 +140,7 @@ mutable struct Grid
                     nbuf,
                     ntrans,
                     fdord,
+                    ord_s,
                     xbox,
                     dt,
                     t,
@@ -157,6 +161,7 @@ mutable struct Grid
                 println("  nbuf   = ", levs[i].nbuf)
                 println("  ntrans = ", levs[i].ntrans)
                 println("  fdord  = ", levs[i].fdord)
+                println("  ord_s  = ", levs[i].ord_s)
                 if length(levs[i].if2c) == levs[i].nxa
                     println(
                         "  ibox   = ",
